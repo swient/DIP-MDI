@@ -69,6 +69,12 @@
     <Compile Include="DIPSample.Designer.cs">
       <DependentUpon>DIPSample.cs</DependentUpon>
     </Compile>
+    <Compile Include="MSForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MSForm.Designer.cs">
+      <DependentUpon>MSForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="DIPSample.resx">
