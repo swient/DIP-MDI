@@ -123,6 +123,24 @@ extern "C" {
         }
     }
 
+    __declspec(dllexport) void brightness(int* f, int w, int h, int s, int* g)
+    {
+        for (int i = 0; i < w * h; i++) {
+            g[i] = f[i] + s;
+            if (g[i] > 255) g[i] = 255;
+            if (g[i] < 0) g[i] = 0;
+        }
+    }
+
+    __declspec(dllexport) void contrast(int* f, int w, int h, double s, int* g)
+    {
+        for (int i = 0; i < w * h; i++) {
+            g[i] = (f[i] - 128) * s + 128;
+            if (g[i] > 255) g[i] = 255;
+            if (g[i] < 0) g[i] = 0;
+        }
+    }
+
     __declspec(dllexport) void histogram(int* f, int w, int h, int* g)
     {
         int* hist = (int*)calloc(256, sizeof(int));
@@ -204,5 +222,83 @@ extern "C" {
         // 釋放記憶體
         free(hist);
         free(cdf);
+    }
+
+    __declspec(dllexport) void averagefilter(int* f, int w, int h, int s, int* g)
+    {
+        int** matrix = Convert1DTo2D(f, w, h);
+        int** tempMatrix = Convert1DTo2D(g, w, h);
+        int start = ceil(-s / 2) + 1;
+        int end = floor(s / 2);
+
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int sum = 0;
+                int count = 0;
+
+                for (int i = start; i <= end; i++) {
+                    for (int j = start; j <= end; j++) {
+                        if (x + i >= 0 && x + i < w && y + j >= 0 && y + j < h) {
+                            sum += matrix[y + j][x + i];
+                            count++;
+                        }
+                    }
+                }
+                tempMatrix[y][x] = (count > 0) ? sum / count : matrix[y][x];
+            }
+        }
+
+        Convert2DTo1D(tempMatrix, g, w, h);
+
+        for (int i = 0; i < h; i++) {
+            free(matrix[i]);
+        }
+        free(matrix);
+    }
+
+    __declspec(dllexport) void highpassfilter(int* f, int w, int h, int* g)
+    {
+        int** matrix = Convert1DTo2D(f, w, h);
+        int** tempMatrix = Convert1DTo2D(g, w, h);
+        const int kernel[3][3] = {
+            { -1, 0, -1 },
+            { 0, 4, 0 },
+            { -1, 0, -1 }
+        };
+
+        int minVal = INT_MAX;
+        int maxVal = INT_MIN;
+
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int sum = 0;
+
+                for (int i = -1; i <= 1; i++) {
+                    for (int j = -1; j <= 1; j++) {
+                        if (x + i >= 0 && x + i < w && y + j >= 0 && y + j < h) {
+                            sum += matrix[y + j][x + i] * kernel[i + 1][j + 1];
+                        }
+                    }
+                }
+                minVal = min(minVal, sum);
+                maxVal = max(maxVal, sum);
+
+                tempMatrix[y][x] = sum;
+            }
+        }
+
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int normalized = (tempMatrix[y][x] - minVal) * 255 / (maxVal - minVal);
+                tempMatrix[y][x] = min(max(normalized, 0), 255);
+            }
+        }
+
+        Convert2DTo1D(tempMatrix, g, w, h);
+
+        for (int i = 0; i < h; i++) {
+            free(matrix[i]);
+        }
+        free(matrix);
     }
 }

@@ -40,6 +40,8 @@
             this.負片轉換ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.局部馬賽克ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.均衡化ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.亮度ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.對比度ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.視圖ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.直方圖ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.圖像toolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,6 +52,9 @@
             this.翻轉圖像ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.水平翻轉ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.垂直翻轉ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.濾波器ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.平均濾波器ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.高通濾波器ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -61,7 +66,8 @@
             this.檔案ToolStripMenuItem,
             this.編輯ToolStripMenuItem,
             this.視圖ToolStripMenuItem,
-            this.圖像toolStripMenuItem});
+            this.圖像toolStripMenuItem,
+            this.濾波器ToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 1, 0, 1);
@@ -119,7 +125,9 @@
             this.編輯ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.負片轉換ToolStripMenuItem,
             this.局部馬賽克ToolStripMenuItem,
-            this.均衡化ToolStripMenuItem});
+            this.均衡化ToolStripMenuItem,
+            this.亮度ToolStripMenuItem,
+            this.對比度ToolStripMenuItem});
             this.編輯ToolStripMenuItem.Name = "編輯ToolStripMenuItem";
             this.編輯ToolStripMenuItem.Size = new System.Drawing.Size(43, 22);
             this.編輯ToolStripMenuItem.Text = "編輯";
@@ -144,6 +152,20 @@
             this.均衡化ToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.均衡化ToolStripMenuItem.Text = "均衡化";
             this.均衡化ToolStripMenuItem.Click += new System.EventHandler(this.均衡化ToolStripMenuItem_Click);
+            // 
+            // 亮度ToolStripMenuItem
+            // 
+            this.亮度ToolStripMenuItem.Name = "亮度ToolStripMenuItem";
+            this.亮度ToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.亮度ToolStripMenuItem.Text = "亮度";
+            this.亮度ToolStripMenuItem.Click += new System.EventHandler(this.亮度ToolStripMenuItem_Click);
+            // 
+            // 對比度ToolStripMenuItem
+            // 
+            this.對比度ToolStripMenuItem.Name = "對比度ToolStripMenuItem";
+            this.對比度ToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.對比度ToolStripMenuItem.Text = "對比度";
+            this.對比度ToolStripMenuItem.Click += new System.EventHandler(this.對比度ToolStripMenuItem_Click);
             // 
             // 視圖ToolStripMenuItem
             // 
@@ -223,6 +245,29 @@
             this.垂直翻轉ToolStripMenuItem.Text = "垂直翻轉";
             this.垂直翻轉ToolStripMenuItem.Click += new System.EventHandler(this.垂直翻轉ToolStripMenuItem_Click);
             // 
+            // 濾波器ToolStripMenuItem
+            // 
+            this.濾波器ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.平均濾波器ToolStripMenuItem,
+            this.高通濾波器ToolStripMenuItem});
+            this.濾波器ToolStripMenuItem.Name = "濾波器ToolStripMenuItem";
+            this.濾波器ToolStripMenuItem.Size = new System.Drawing.Size(55, 22);
+            this.濾波器ToolStripMenuItem.Text = "濾波器";
+            // 
+            // 平均濾波器ToolStripMenuItem
+            // 
+            this.平均濾波器ToolStripMenuItem.Name = "平均濾波器ToolStripMenuItem";
+            this.平均濾波器ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.平均濾波器ToolStripMenuItem.Text = "平均濾波器";
+            this.平均濾波器ToolStripMenuItem.Click += new System.EventHandler(this.平均濾波器ToolStripMenuItem_Click);
+            // 
+            // 高通濾波器ToolStripMenuItem
+            // 
+            this.高通濾波器ToolStripMenuItem.Name = "高通濾波器ToolStripMenuItem";
+            this.高通濾波器ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.高通濾波器ToolStripMenuItem.Text = "高通濾波器";
+            this.高通濾波器ToolStripMenuItem.Click += new System.EventHandler(this.高通濾波器ToolStripMenuItem_Click);
+            // 
             // DIPSample
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -258,6 +303,8 @@
         private System.Windows.Forms.ToolStripMenuItem 負片轉換ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 局部馬賽克ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 均衡化ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 亮度ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 對比度ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 視圖ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 直方圖ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 圖像toolStripMenuItem;
@@ -268,6 +315,9 @@
         private System.Windows.Forms.ToolStripMenuItem 翻轉圖像ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 水平翻轉ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 垂直翻轉ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 濾波器ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 平均濾波器ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 高通濾波器ToolStripMenuItem;
     }
 }
 

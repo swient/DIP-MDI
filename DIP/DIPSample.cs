@@ -30,6 +30,8 @@ namespace DIP
         unsafe public static extern void histogram(int* f0, int w, int h, int* g0);
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
         unsafe public static extern void equalization(int* f0, int w, int h, int* g0);
+        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
+        unsafe public static extern void highpassfilter(int* f0, int w, int h, int* g0);
 
         private void DIPSample_Load(object sender, EventArgs e)
         {
@@ -71,7 +73,13 @@ namespace DIP
             {
                 if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
                 {
-                    if (cF is MSForm msForm)
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("請先完成編輯");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
                     {
                         // 開啟儲存對話框
                         SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -109,7 +117,13 @@ namespace DIP
             {
                 if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
                 {
-                    if (cF is MSForm msForm)
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("請先完成編輯");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
                     {
                         // 將 Bitmap 轉換為陣列
                         int[] f = bmp2array(msForm.pBitmap);
@@ -151,7 +165,13 @@ namespace DIP
             {
                 if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
                 {
-                    if (cF is MSForm msForm)
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("請先完成編輯");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
                     {
                         // 將 Bitmap 轉換為陣列
                         int[] f = bmp2array(msForm.pBitmap);
@@ -181,6 +201,77 @@ namespace DIP
             childForm.Show();
         }
 
+        private void 亮度ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MdiChildren.Length == 0)
+            {
+                MessageBox.Show("沒有開啟的圖片");
+                return;
+            }
+
+            foreach (Form cF in MdiChildren)
+            {
+                if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
+                {
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("已經開啟調整視窗");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
+                    {
+                        NpBitmap = new Bitmap(msForm.pBitmap);
+                    }
+
+                    break; // 找到聚焦的視窗後跳出迴圈
+                }
+            }
+
+            SliderForm childForm = new SliderForm();
+            childForm.Select = 0;
+            childForm.MdiParent = this;
+            childForm.pf1 = toolStripStatusLabel1;
+            childForm.NpBitmap = NpBitmap;
+            childForm.Show();
+        }
+
+        private void 對比度ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MdiChildren.Length == 0)
+            {
+                MessageBox.Show("沒有開啟的圖片");
+                return;
+            }
+
+            foreach (Form cF in MdiChildren)
+            {
+                if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
+                {
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("已經開啟調整視窗");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
+                    {
+                        NpBitmap = new Bitmap(msForm.pBitmap);
+                    }
+
+                    break; // 找到聚焦的視窗後跳出迴圈
+                }
+            }
+
+            SliderForm childForm = new SliderForm();
+            childForm.Select = 1;
+            childForm.MdiParent = this;
+            childForm.pf1 = toolStripStatusLabel1;
+            childForm.NpBitmap = NpBitmap;
+            childForm.Show();
+        }
+
         private void 均衡化ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (MdiChildren.Length == 0)
@@ -194,7 +285,13 @@ namespace DIP
             {
                 if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
                 {
-                    if (cF is MSForm msForm)
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("請先完成編輯");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
                     {
                         // 將 Bitmap 轉換為陣列
                         int[] f = bmp2array(msForm.pBitmap);
@@ -212,7 +309,7 @@ namespace DIP
                         // 將處理後的陣列轉換回 Bitmap
                         NpBitmap = array2bmp(g, msForm.pBitmap.Width, msForm.pBitmap.Height);
                     }
-                    
+
                     break; // 找到聚焦的視窗後跳出迴圈
                 }
             }
@@ -237,7 +334,13 @@ namespace DIP
             {
                 if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
                 {
-                    if (cF is MSForm msForm)
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("請先完成編輯");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
                     {
                         // 將 Bitmap 轉換為陣列
                         int[] f = bmp2array(msForm.pBitmap);
@@ -268,6 +371,90 @@ namespace DIP
             childForm.Show();
         }
 
+        private void 平均濾波器ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MdiChildren.Length == 0)
+            {
+                MessageBox.Show("沒有開啟的圖片");
+                return;
+            }
+
+            foreach (Form cF in MdiChildren)
+            {
+                if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
+                {
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("已經開啟調整視窗！");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
+                    {
+                        NpBitmap = new Bitmap(msForm.pBitmap);
+                    }
+
+                    break; // 找到聚焦的視窗後跳出迴圈
+                }
+            }
+
+            SliderForm childForm = new SliderForm();
+            childForm.Select = 2;
+            childForm.MdiParent = this;
+            childForm.pf1 = toolStripStatusLabel1;
+            childForm.NpBitmap = NpBitmap;
+            childForm.Show();
+        }
+
+        private void 高通濾波器ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MdiChildren.Length == 0)
+            {
+                MessageBox.Show("沒有開啟的圖片");
+                return;
+            }
+
+            // 遍歷所有 MDI 子視窗，尋找當前聚焦的視窗
+            foreach (Form cF in MdiChildren)
+            {
+                if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
+                {
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("請先完成編輯");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
+                    {
+                        // 將 Bitmap 轉換為陣列
+                        int[] f = bmp2array(msForm.pBitmap);
+                        int[] g = new int[w * h]; // 假設 w 和 h 是圖片的寬高
+
+                        // 使用 unsafe 區域進行指針處理
+                        unsafe
+                        {
+                            fixed (int* f0 = f) fixed (int* g0 = g)
+                            {
+                                highpassfilter(f0, w, h, g0); // 進行局部馬賽克的處理
+                            }
+                        }
+
+                        // 將處理後的陣列轉換回 Bitmap
+                        NpBitmap = array2bmp(g, msForm.pBitmap.Width, msForm.pBitmap.Height);
+                    }
+
+                    break; // 找到聚焦的視窗後跳出迴圈
+                }
+            }
+
+            MSForm childForm = new MSForm();
+            childForm.MdiParent = this;
+            childForm.pf1 = toolStripStatusLabel1;
+            childForm.pBitmap = NpBitmap;
+            childForm.Show();
+        }
+
         private void 向右旋轉90度ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (MdiChildren.Length == 0)
@@ -280,7 +467,13 @@ namespace DIP
             {
                 if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
                 {
-                    if (cF is MSForm msForm)
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("請先完成編輯");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
                     {
                         Bitmap rotatedBitmap = new Bitmap(msForm.pBitmap.Height, msForm.pBitmap.Width); // 90° 旋轉後寬高互換
 
@@ -324,7 +517,13 @@ namespace DIP
             {
                 if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
                 {
-                    if (cF is MSForm msForm)
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("請先完成編輯");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
                     {
                         Bitmap rotatedBitmap = new Bitmap(msForm.pBitmap.Width, msForm.pBitmap.Height); // 180° 旋轉後大小不變
                                                                                                  // 遍歷原圖的每個像素
@@ -367,7 +566,13 @@ namespace DIP
             {
                 if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
                 {
-                    if (cF is MSForm msForm)
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("請先完成編輯");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
                     {
                         Bitmap rotatedBitmap = new Bitmap(msForm.pBitmap.Height, msForm.pBitmap.Width); // 270° 旋轉後寬高互換
                         // 遍歷原圖的每個像素
@@ -410,7 +615,13 @@ namespace DIP
             {
                 if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
                 {
-                    if (cF is MSForm msForm)
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("請先完成編輯");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
                     {
                         Bitmap flippedBitmap = new Bitmap(msForm.pBitmap.Width, msForm.pBitmap.Height);
                         // 遍歷原圖的每個像素
@@ -453,7 +664,13 @@ namespace DIP
             {
                 if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
                 {
-                    if (cF is MSForm msForm)
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("請先完成編輯");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
                     {
                         Bitmap flippedBitmap = new Bitmap(msForm.pBitmap.Width, msForm.pBitmap.Height);
                         // 遍歷原圖的每個像素
