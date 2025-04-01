@@ -29,10 +29,6 @@
         private void InitializeComponent()
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.檔案ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.開啟ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.儲存ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -55,6 +51,12 @@
             this.濾波器ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.平均濾波器ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.高通濾波器ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.自訂濾波器ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -75,28 +77,6 @@
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
-            // statusStrip1
-            // 
-            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 607);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 9, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(1052, 22);
-            this.statusStrip1.TabIndex = 1;
-            this.statusStrip1.Text = "statusStrip1";
-            // 
-            // toolStripStatusLabel1
-            // 
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(128, 17);
-            this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
-            // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.FileName = "openFileDialog1";
-            // 
             // 檔案ToolStripMenuItem
             // 
             this.檔案ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -109,14 +89,14 @@
             // 開啟ToolStripMenuItem
             // 
             this.開啟ToolStripMenuItem.Name = "開啟ToolStripMenuItem";
-            this.開啟ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.開啟ToolStripMenuItem.Size = new System.Drawing.Size(98, 22);
             this.開啟ToolStripMenuItem.Text = "開啟";
             this.開啟ToolStripMenuItem.Click += new System.EventHandler(this.開啟ToolStripMenuItem_Click);
             // 
             // 儲存ToolStripMenuItem
             // 
             this.儲存ToolStripMenuItem.Name = "儲存ToolStripMenuItem";
-            this.儲存ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.儲存ToolStripMenuItem.Size = new System.Drawing.Size(98, 22);
             this.儲存ToolStripMenuItem.Text = "儲存";
             this.儲存ToolStripMenuItem.Click += new System.EventHandler(this.儲存ToolStripMenuItem_Click);
             // 
@@ -249,7 +229,9 @@
             // 
             this.濾波器ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.平均濾波器ToolStripMenuItem,
-            this.高通濾波器ToolStripMenuItem});
+            this.高通濾波器ToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.自訂濾波器ToolStripMenuItem});
             this.濾波器ToolStripMenuItem.Name = "濾波器ToolStripMenuItem";
             this.濾波器ToolStripMenuItem.Size = new System.Drawing.Size(55, 22);
             this.濾波器ToolStripMenuItem.Text = "濾波器";
@@ -267,6 +249,40 @@
             this.高通濾波器ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.高通濾波器ToolStripMenuItem.Text = "高通濾波器";
             this.高通濾波器ToolStripMenuItem.Click += new System.EventHandler(this.高通濾波器ToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            // 
+            // 自訂濾波器ToolStripMenuItem
+            // 
+            this.自訂濾波器ToolStripMenuItem.Name = "自訂濾波器ToolStripMenuItem";
+            this.自訂濾波器ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.自訂濾波器ToolStripMenuItem.Text = "自訂濾波器";
+            this.自訂濾波器ToolStripMenuItem.Click += new System.EventHandler(this.自訂濾波器ToolStripMenuItem_Click);
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel1});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 607);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 9, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(1052, 22);
+            this.statusStrip1.TabIndex = 1;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(128, 17);
+            this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.FileName = "openFileDialog1";
             // 
             // DIPSample
             // 
@@ -318,6 +334,8 @@
         private System.Windows.Forms.ToolStripMenuItem 濾波器ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 平均濾波器ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 高通濾波器ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem 自訂濾波器ToolStripMenuItem;
     }
 }
 

@@ -236,8 +236,8 @@ extern "C" {
                 int sum = 0;
                 int count = 0;
 
-                for (int i = start; i <= end; i++) {
-                    for (int j = start; j <= end; j++) {
+                for (int j = start; j <= end; j++) {
+                    for (int i = start; i <= end; i++) {
                         if (x + i >= 0 && x + i < w && y + j >= 0 && y + j < h) {
                             sum += matrix[y + j][x + i];
                             count++;
@@ -273,10 +273,13 @@ extern "C" {
             for (int x = 0; x < w; x++) {
                 int sum = 0;
 
-                for (int i = -1; i <= 1; i++) {
-                    for (int j = -1; j <= 1; j++) {
-                        if (x + i >= 0 && x + i < w && y + j >= 0 && y + j < h) {
-                            sum += matrix[y + j][x + i] * kernel[i + 1][j + 1];
+                for (int j = -1; j <= 1; j++) {
+                    for (int i = -1; i <= 1; i++) {
+                        int newX = x + i;
+                        int newY = y + j;
+
+                        if (newX >= 0 && newX < w && newY >= 0 && newY < h) {
+                            sum += matrix[newY][newX] * kernel[j + 1][i + 1];
                         }
                     }
                 }
@@ -301,4 +304,40 @@ extern "C" {
         }
         free(matrix);
     }
+
+	__declspec(dllexport) void customfilter(int* f, int w, int h, int d, int* c, int* g)
+	{
+		int** matrix = Convert1DTo2D(f, w, h);
+		int** tempMatrix = Convert1DTo2D(g, w, h);
+		int kernel[3][3] = {
+			{ c[0], c[1], c[2] },
+			{ c[3], c[4], c[5] },
+			{ c[6], c[7], c[8] }
+		};
+
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int sum = 0;
+
+                for (int j = -1; j <= 1; j++) {
+                    for (int i = -1; i <= 1; i++) {
+                        int newX = x + i;
+                        int newY = y + j;
+
+                        if (newX >= 0 && newX < w && newY >= 0 && newY < h) {
+                            sum += matrix[newY][newX] * kernel[j + 1][i + 1];
+                        }
+                    }
+                }
+                tempMatrix[y][x] = min(max(sum / d, 0), 255);
+            }
+        }
+
+        Convert2DTo1D(tempMatrix, g, w, h);
+
+        for (int i = 0; i < h; i++) {
+            free(matrix[i]);
+        }
+        free(matrix);
+	}
 }
