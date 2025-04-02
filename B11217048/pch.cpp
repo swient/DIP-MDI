@@ -383,4 +383,29 @@ extern "C" {
 		}
 		free(tempMatrix);
     }
+
+    __declspec(dllexport) void zoom(int* f, int w, int h, double s, int* g)
+    {
+        int nw = (int)round(w * s);
+        int nh = (int)round(h * s);
+
+        double scale_x = (double)(w - 1) / (nw - 1);
+        double scale_y = (double)(h - 1) / (nh - 1);
+
+        for (int j = 0; j < nh; j++)
+        {
+            for (int i = 0; i < nw; i++)
+            {
+                // 修正中心對齊的計算方式
+                int x = (int)round((i + 0.5) * scale_x - 0.5);
+                int y = (int)round((j + 0.5) * scale_y - 0.5);
+
+                // 限制 x 和 y 在合法範圍內
+                x = min(w - 1, max(0, x));
+                y = min(h - 1, max(0, y));
+
+                g[j * nw + i] = f[y * w + x];
+            }
+        }
+    }
 }
