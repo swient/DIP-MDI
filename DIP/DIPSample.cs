@@ -637,6 +637,41 @@ namespace DIP
             childForm.Show();
         }
 
+        private void 自訂旋轉角度ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MdiChildren.Length == 0)
+            {
+                MessageBox.Show("沒有開啟的圖片");
+                return;
+            }
+
+            foreach (Form cF in MdiChildren)
+            {
+                if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
+                {
+                    // 根據視窗類型來選擇對應的 pBitmap
+                    if (cF is SliderForm sliderForm)
+                    {
+                        MessageBox.Show("已經開啟調整視窗");
+                        return;
+                    }
+                    else if (cF is MSForm msForm)
+                    {
+                        NpBitmap = new Bitmap(msForm.pBitmap);
+                    }
+
+                    break; // 找到聚焦的視窗後跳出迴圈
+                }
+            }
+
+            SliderForm childForm = new SliderForm();
+            childForm.Select = 3;
+            childForm.MdiParent = this;
+            childForm.pf1 = toolStripStatusLabel1;
+            childForm.NpBitmap = NpBitmap;
+            childForm.Show();
+        }
+
         private void 水平翻轉ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (MdiChildren.Length == 0)

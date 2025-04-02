@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <cstring>
 #include <math.h>
+#include <cmath>
 
 // 使用先行編譯的標頭時，需要來源檔案才能使編譯成功。
 
@@ -19,13 +20,6 @@ extern "C" {
                 array1D[y * width + x] = array2D[y][x];
             }
         }
-
-		for (int i = 0; i < height; i++)
-		{
-			free(array2D[i]);
-		}
-
-		free(array2D);
     }
 
     // 將一維陣列轉為二維陣列
@@ -135,7 +129,7 @@ extern "C" {
     __declspec(dllexport) void contrast(int* f, int w, int h, double s, int* g)
     {
         for (int i = 0; i < w * h; i++) {
-            g[i] = (f[i] - 128) * s + 128;
+            g[i] = (int)((f[i] - 128) * s + 128);
             if (g[i] > 255) g[i] = 255;
             if (g[i] < 0) g[i] = 0;
         }
@@ -228,8 +222,8 @@ extern "C" {
     {
         int** matrix = Convert1DTo2D(f, w, h);
         int** tempMatrix = Convert1DTo2D(g, w, h);
-        int start = ceil(-s / 2) + 1;
-        int end = floor(s / 2);
+        int start = (int)ceil(-s / 2) + 1;
+        int end = (int)floor(s / 2);
 
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
@@ -252,8 +246,10 @@ extern "C" {
 
         for (int i = 0; i < h; i++) {
             free(matrix[i]);
+			free(tempMatrix[i]);
         }
         free(matrix);
+		free(tempMatrix);
     }
 
     __declspec(dllexport) void highpassfilter(int* f, int w, int h, int* g)
@@ -301,8 +297,10 @@ extern "C" {
 
         for (int i = 0; i < h; i++) {
             free(matrix[i]);
+			free(tempMatrix[i]);
         }
         free(matrix);
+		free(tempMatrix);
     }
 
 	__declspec(dllexport) void customfilter(int* f, int w, int h, int d, int* c, int* g)
@@ -337,7 +335,52 @@ extern "C" {
 
         for (int i = 0; i < h; i++) {
             free(matrix[i]);
+			free(tempMatrix[i]);
         }
         free(matrix);
+		free(tempMatrix);
 	}
+
+    __declspec(dllexport) void customrotationangle(int* f, int w, int h, int a, int* g)
+    {
+        const double M_PI = 3.14159265358979323846;
+        double theta = a * M_PI / 180.0;
+
+        int nw = (int)(h * std::abs(sin(theta)) + w * std::abs(cos(theta)));
+        int nh = (int)(w * std::abs(sin(theta)) + h * std::abs(cos(theta)));
+
+        for (int i = 0; i < nw * nh; i++)
+        {
+            g[i] = 255;
+        }
+
+        int** matrix = Convert1DTo2D(f, w, h);
+        int** tempMatrix = Convert1DTo2D(g, nw, nh);
+
+        int cx = w / 2, cy = h / 2;
+        int cx_new = nw / 2, cy_new = nh / 2;
+
+        for (int y = 0; y < nh; y++) {
+            for (int x = 0; x < nw; x++) {
+                int x_orig = (int)round(cos(-theta) * (x - cx_new) - sin(-theta) * (y - cy_new) + cx);
+                int y_orig = (int)round(sin(-theta) * (x - cx_new) + cos(-theta) * (y - cy_new) + cy);
+
+                if (x_orig >= 0 && x_orig < w && y_orig >= 0 && y_orig < h) {
+                    tempMatrix[y][x] = matrix[y_orig][x_orig];
+                }
+            }
+        }
+
+        Convert2DTo1D(tempMatrix, g, nw, nh);
+
+        for (int i = 0; i < h; i++) {
+            free(matrix[i]);
+        }
+        free(matrix);
+
+		for (int i = 0; i < nh; i++) {
+			free(tempMatrix[i]);
+		}
+		free(tempMatrix);
+    }
 }

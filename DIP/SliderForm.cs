@@ -35,6 +35,9 @@ namespace DIP
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
         unsafe public static extern void averagefilter(int* f0, int w, int h, int s, int* g0);
 
+        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
+        unsafe public static extern void customrotationangle(int* f0, int w, int h, int a, int* g0);
+
         private void SliderForm_Load(object sender, EventArgs e)
         {
             bmp_dip(NpBitmap, pictureBox1);
@@ -74,6 +77,17 @@ namespace DIP
                 trackBar1.Value = 1;
                 textBox1.Text = trackBar1.Value.ToString();
             }
+            else if(Select == 3)
+            {
+                label1.Text = "自訂旋轉角度";
+                // 設置最小值
+                trackBar1.Minimum = 0;
+                // 設置最大值
+                trackBar1.Maximum = 360;
+                // 設置初始值
+                trackBar1.Value = 0;
+                textBox1.Text = trackBar1.Value.ToString();
+            }
         }
 
         private void bmp_dip(Bitmap NpBitmap, PictureBox pictureBox1)
@@ -83,6 +97,16 @@ namespace DIP
             pictureBox1.Image = NpBitmap;
             pictureBox1.Width = NpBitmap.Width;
             pictureBox1.Height = NpBitmap.Height;
+
+            if (Select == 3)
+            {
+                this.Width = (int)(NpBitmap.Width * 1.414) + (this.Width - this.ClientRectangle.Width) * 30;
+                this.Height = (int)(NpBitmap.Height * 1.414) + (this.Height - this.ClientRectangle.Height) + 100;
+                pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
+                pictureBox1.Width = (int)(NpBitmap.Width * 1.414);
+                pictureBox1.Height = (int)(NpBitmap.Height * 1.414);
+            }
+
             // 調整 trackBar1 位置：將其放在圖片的右邊，視窗的底部
             trackBar1.Location = new Point(pictureBox1.Right + 60, this.ClientRectangle.Bottom - trackBar1.Height - 100);
             // 調整 textBox1 位置：將其放在 trackBar1 的上方，並且置中
@@ -98,7 +122,7 @@ namespace DIP
             int[] f;
             int[] g;
 
-            if (Select == 0)
+            if (Select == 0) // 亮度
             {
                 textBox1.Text = trackBar1.Value.ToString();
 
@@ -114,7 +138,7 @@ namespace DIP
 
                 pBitmap = array2bmp(g, NpBitmap.Width, NpBitmap.Height);
             }
-            else if (Select == 1)
+            else if (Select == 1) // 對比度
             {
                 double c = (double)trackBar1.Value / 100;
                 textBox1.Text = c.ToString();
@@ -131,7 +155,7 @@ namespace DIP
 
                 pBitmap = array2bmp(g, NpBitmap.Width, NpBitmap.Height);
             }
-            else if (Select == 2)
+            else if (Select == 2) // 平均濾波
             {
                 textBox1.Text = trackBar1.Value.ToString();
 
@@ -146,6 +170,27 @@ namespace DIP
                 }
 
                 pBitmap = array2bmp(g, NpBitmap.Width, NpBitmap.Height);
+            }
+            else if (Select == 3) // 自訂旋轉角度
+            {
+                textBox1.Text = trackBar1.Value.ToString();
+
+                f = bmp2array(NpBitmap);
+                double theta;
+                theta = (double)trackBar1.Value * Math.PI / 180;
+                int new_weight = (int)(NpBitmap.Height * Math.Abs(Math.Sin(theta)) + NpBitmap.Width * Math.Abs(Math.Cos(theta)));
+                int new_height = (int)(NpBitmap.Height * Math.Abs(Math.Cos(theta)) + NpBitmap.Width * Math.Abs(Math.Sin(theta)));
+                g = new int[new_weight * new_height];
+                unsafe
+                {
+                    fixed (int* f0 = f) fixed (int* g0 = g)
+                    {
+                        
+                        customrotationangle(f0, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, g0);
+                    }
+                }
+
+                pBitmap = array2bmp(g, new_weight, new_height);
             }
 
             pictureBox1.Image = pBitmap;

@@ -57,6 +57,8 @@
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.自訂旋轉角度ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -176,29 +178,31 @@
             this.旋轉圖像ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.向右旋轉90度ToolStripMenuItem,
             this.向右旋轉180度ToolStripMenuItem,
-            this.向右旋轉270度ToolStripMenuItem});
+            this.向右旋轉270度ToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.自訂旋轉角度ToolStripMenuItem});
             this.旋轉圖像ToolStripMenuItem.Name = "旋轉圖像ToolStripMenuItem";
-            this.旋轉圖像ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.旋轉圖像ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.旋轉圖像ToolStripMenuItem.Text = "旋轉圖像";
             // 
             // 向右旋轉90度ToolStripMenuItem
             // 
             this.向右旋轉90度ToolStripMenuItem.Name = "向右旋轉90度ToolStripMenuItem";
-            this.向右旋轉90度ToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.向右旋轉90度ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.向右旋轉90度ToolStripMenuItem.Text = "向右旋轉90度";
             this.向右旋轉90度ToolStripMenuItem.Click += new System.EventHandler(this.向右旋轉90度ToolStripMenuItem_Click);
             // 
             // 向右旋轉180度ToolStripMenuItem
             // 
             this.向右旋轉180度ToolStripMenuItem.Name = "向右旋轉180度ToolStripMenuItem";
-            this.向右旋轉180度ToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.向右旋轉180度ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.向右旋轉180度ToolStripMenuItem.Text = "向右旋轉180度";
             this.向右旋轉180度ToolStripMenuItem.Click += new System.EventHandler(this.向右旋轉180度ToolStripMenuItem_Click);
             // 
             // 向右旋轉270度ToolStripMenuItem
             // 
             this.向右旋轉270度ToolStripMenuItem.Name = "向右旋轉270度ToolStripMenuItem";
-            this.向右旋轉270度ToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.向右旋轉270度ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.向右旋轉270度ToolStripMenuItem.Text = "向右旋轉270度";
             this.向右旋轉270度ToolStripMenuItem.Click += new System.EventHandler(this.向右旋轉270度ToolStripMenuItem_Click);
             // 
@@ -208,7 +212,7 @@
             this.水平翻轉ToolStripMenuItem,
             this.垂直翻轉ToolStripMenuItem});
             this.翻轉圖像ToolStripMenuItem.Name = "翻轉圖像ToolStripMenuItem";
-            this.翻轉圖像ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.翻轉圖像ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.翻轉圖像ToolStripMenuItem.Text = "翻轉圖像";
             // 
             // 水平翻轉ToolStripMenuItem
@@ -239,26 +243,26 @@
             // 平均濾波器ToolStripMenuItem
             // 
             this.平均濾波器ToolStripMenuItem.Name = "平均濾波器ToolStripMenuItem";
-            this.平均濾波器ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.平均濾波器ToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.平均濾波器ToolStripMenuItem.Text = "平均濾波器";
             this.平均濾波器ToolStripMenuItem.Click += new System.EventHandler(this.平均濾波器ToolStripMenuItem_Click);
             // 
             // 高通濾波器ToolStripMenuItem
             // 
             this.高通濾波器ToolStripMenuItem.Name = "高通濾波器ToolStripMenuItem";
-            this.高通濾波器ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.高通濾波器ToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.高通濾波器ToolStripMenuItem.Text = "高通濾波器";
             this.高通濾波器ToolStripMenuItem.Click += new System.EventHandler(this.高通濾波器ToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(131, 6);
             // 
             // 自訂濾波器ToolStripMenuItem
             // 
             this.自訂濾波器ToolStripMenuItem.Name = "自訂濾波器ToolStripMenuItem";
-            this.自訂濾波器ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.自訂濾波器ToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.自訂濾波器ToolStripMenuItem.Text = "自訂濾波器";
             this.自訂濾波器ToolStripMenuItem.Click += new System.EventHandler(this.自訂濾波器ToolStripMenuItem_Click);
             // 
@@ -283,6 +287,18 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+            // 
+            // 自訂旋轉角度ToolStripMenuItem
+            // 
+            this.自訂旋轉角度ToolStripMenuItem.Name = "自訂旋轉角度ToolStripMenuItem";
+            this.自訂旋轉角度ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.自訂旋轉角度ToolStripMenuItem.Text = "自訂旋轉角度";
+            this.自訂旋轉角度ToolStripMenuItem.Click += new System.EventHandler(this.自訂旋轉角度ToolStripMenuItem_Click);
             // 
             // DIPSample
             // 
@@ -336,6 +352,8 @@
         private System.Windows.Forms.ToolStripMenuItem 高通濾波器ToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem 自訂濾波器ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem 自訂旋轉角度ToolStripMenuItem;
     }
 }
 
