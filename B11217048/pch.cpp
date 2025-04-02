@@ -135,47 +135,6 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) void histogram(int* f, int w, int h, int* g)
-    {
-        int* hist = (int*)calloc(256, sizeof(int));
-
-        if (hist == NULL) {
-            return;
-        }
-
-        // 背景設為白色
-        for (int i = 0; i < 256 * 256; i++) {
-            g[i] = 255;
-        }
-
-        // 計算原始圖像的直方圖
-        for (int i = 0; i < w * h; i++) {
-            if (f[i] >= 0 && f[i] < 256) {
-                hist[f[i]]++;
-            }
-        }
-
-        // 計算最大頻率值
-        int max_hist = 0;
-        for (int i = 0; i < 256; i++) {
-            if (hist[i] > max_hist) {
-                max_hist = hist[i];
-            }
-        }
-
-        // 計算每个灰階的高度，按比例缩放到 256 高度的畫布中
-        for (int x = 0; x < 256; x++) {
-            int bar_height = (int)((float)hist[x] / max_hist * 255);
-
-            // 繪制直方圖的每一條柱狀圖
-            for (int y = 0; y <= bar_height; y++) {
-                g[(255 - y) * 256 + x] = 0;
-            }
-        }
-
-        free(hist);
-    }
-
     __declspec(dllexport) void equalization(int* f, int w, int h, int* g)
     {
         int* hist = (int*)calloc(256, sizeof(int));

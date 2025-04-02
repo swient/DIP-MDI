@@ -10,6 +10,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
+using OxyPlot;
+using OxyPlot.Series;
+using OxyPlot.Axes;
+using OxyPlot.WindowsForms;
 
 namespace DIP
 {
@@ -317,38 +321,119 @@ namespace DIP
                     // 確認視窗類型為 MSForm
                     if (cF is MSForm msForm)
                     {
-                        // 將 Bitmap 轉換為陣列
-                        int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);
-                        int[] g = new int[256 * 256]; // 假設 w 和 h 是圖片的寬高
+                        // ===== 直方圖計算部分 =====
+                        Bitmap sourceBmp = msForm.pBitmap;
+                        int[] histogram = new int[256]; // 初始化256階灰度直方圖陣列
 
-                        // 使用 unsafe 區域進行指針處理
+                        // 鎖定Bitmap數據以提高存取效率
+                        var data = sourceBmp.LockBits(
+                            new Rectangle(0, 0, sourceBmp.Width, sourceBmp.Height),
+                            ImageLockMode.ReadOnly,
+                            PixelFormat.Format32bppArgb);
+
+                        // 不安全代碼區塊直接操作指針
                         unsafe
                         {
-                            fixed (int* f0 = f) fixed (int* g0 = g)
+                            byte* ptr = (byte*)data.Scan0; // 取得像素數據起始指針
+                            for (int y = 0; y < data.Height; y++)
                             {
-                                ImageProcessUtils.histogram(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, g0); // 進行直方圖的計算
+                                for (int x = 0; x < data.Width; x++)
+                                {
+                                    // 計算灰度值 (使用標準加權公式)
+                                    int gray = (int)(0.299 * ptr[2] + 0.587 * ptr[1] + 0.114 * ptr[0]);
+                                    histogram[gray]++; // 累計對應灰度值的計數
+                                    ptr += 4; // 移動到下一個像素 (ARGB格式每個像素4字節)
+                                }
+                                ptr += data.Stride - data.Width * 4; // 換行處理
                             }
                         }
+                        sourceBmp.UnlockBits(data); // 解鎖Bitmap
 
-                        // 將處理後的陣列轉換回 Bitmap
-                        NpBitmap = ImageProcessUtils.ArrayToBitmap(g, 256, 256);
+                        // ===== OxyPlot 繪圖部分 =====
+                        var plotModel = new PlotModel { }; // 創建空的繪圖模型
+
+                        // 創建直方圖系列 (柱狀圖)
+                        var series = new HistogramSeries()
+                        {
+                            FillColor = OxyColors.SteelBlue, // 柱子填充色
+                            StrokeColor = OxyColors.Black,    // 邊框顏色
+                            StrokeThickness = 1               // 邊框粗細
+                        };
+
+                        // 填充直方圖數據
+                        for (int i = 0; i < histogram.Length; i++)
+                        {
+                            // 每個柱子代表1個灰度級 (i到i+1的範圍)
+                            series.Items.Add(new HistogramItem(i, i + 1, histogram[i], 0));
+                        }
+
+                        // 設置X軸 (底部軸)
+                        plotModel.Axes.Add(new LinearAxis
+                        {
+                            Position = AxisPosition.Bottom,
+                            Minimum = -1,     // 顯示範圍起點
+                            Maximum = 257,    // 顯示範圍終點 (比255多2以便完整顯示)
+                            MajorStep = 51    // 主刻度間隔 (255/5=51)
+                        });
+
+                        // 設置Y軸 (左側軸)
+                        plotModel.Axes.Add(new LinearAxis
+                        {
+                            Position = AxisPosition.Left,
+                            Minimum = 0 // Y軸從0開始
+                        });
+
+                        plotModel.Series.Add(series); // 將系列加入模型
+
+                        // ===== 視窗設定部分 =====
+                        Form plotForm = new Form();
+                        plotForm.Text = "直方圖";
+                        plotForm.MdiParent = this; // 設置為MDI子視窗
+
+                        // 設定視窗大小
+                        plotForm.Size = new Size(650, 350); // 寬650,高350
+
+                        // 設定視窗起始位置在父視窗右下角
+                        plotForm.StartPosition = FormStartPosition.Manual;
+                        plotForm.Location = new Point(
+                           this.ClientRectangle.Right - plotForm.Width - (this.Width - this.ClientRectangle.Width),
+                            this.ClientRectangle.Bottom - plotForm.Height - (this.Height - this.ClientRectangle.Height) - 20
+                        );
+
+                        // 固定視窗大小
+                        plotForm.FormBorderStyle = FormBorderStyle.FixedSingle;
+                        plotForm.MaximizeBox = false; // 禁用最大化按鈕
+
+                        // 配置提示功能格式
+                        series.TrackerFormatString = "灰階值: {5}\n數量: {7}";
+
+                        // 創建繪圖視圖
+                        PlotView plotView = new PlotView();
+                        plotView.Dock = DockStyle.Fill; // 填滿整個表單
+                        plotView.Model = plotModel;     // 綁定數據模型
+
+                        // ===== 交互控制部分 =====
+                        var disabledController = new PlotController();
+                        disabledController.UnbindAll();  // 解除所有默認交互綁定
+
+                        // 只保留懸停提示功能
+                        disabledController.BindMouseEnter(PlotCommands.HoverPointsOnlyTrack);
+
+                        plotView.Controller = disabledController;
+                        plotView.ContextMenu = null; // 禁用右鍵菜單
+
+                        // 將繪圖視圖加入表單
+                        plotForm.Controls.Add(plotView);
+                        plotForm.Show();
                     }
                     else
                     {
                         MessageBox.Show("請先完成編輯");
-                        return;
                     }
 
                     break; // 找到聚焦的視窗後跳出迴圈
                 }
             }
-
-            MSForm childForm = new MSForm();
-            childForm.MdiParent = this;
-            childForm.pf1 = toolStripStatusLabel1;
-            childForm.pBitmap = NpBitmap;
-            childForm.isHistogram = true;
-            childForm.Show();
         }
 
         private void 平均濾波器ToolStripMenuItem_Click(object sender, EventArgs e)
