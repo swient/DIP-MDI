@@ -27,9 +27,6 @@ namespace DIP
             InitializeComponent();
         }
 
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe public static extern void customfilter(int* f0, int w, int h, int d, int[] c, int* g0);
-
         private void FilterForm_Load(object sender, EventArgs e)
         {
             bmp_dip(NpBitmap, pictureBox1);
@@ -92,70 +89,19 @@ namespace DIP
                 return;
             }
 
-            f = bmp2array(NpBitmap);
+            f = ImageProcessUtils.BitmapToArray(NpBitmap);
             g = new int[NpBitmap.Width * NpBitmap.Height];
             unsafe
             {
                 fixed (int* f0 = f) fixed (int* g0 = g)
                 {
-                    customfilter(f0, NpBitmap.Width, NpBitmap.Height, divide, customize, g0);
+                    ImageProcessUtils.customfilter(f0, NpBitmap.Width, NpBitmap.Height, divide, customize, g0);
                 }
             }
 
-            pBitmap = array2bmp(g, NpBitmap.Width, NpBitmap.Height);
+            pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
 
             pictureBox2.Image = pBitmap;
-        }
-
-        private int[] bmp2array(Bitmap myBitmap)
-        {
-            int[] ImgData = new int[myBitmap.Width * myBitmap.Height];
-            BitmapData byteArray = myBitmap.LockBits(new Rectangle(0, 0, myBitmap.Width, myBitmap.Height),
-                                                    ImageLockMode.ReadWrite,
-                                                    myBitmap.PixelFormat);
-            int ByteOfSkip = byteArray.Stride - byteArray.Width * (int)(byteArray.Stride / myBitmap.Width);
-            unsafe
-            {
-                byte* imgPtr = (byte*)(byteArray.Scan0);
-                for (int y = 0; y < byteArray.Height; y++)
-                {
-                    for (int x = 0; x < byteArray.Width; x++)
-                    {
-                        ImgData[x + byteArray.Width * y] = (int)*(imgPtr);
-                        imgPtr += (int)(byteArray.Stride / myBitmap.Width);
-                    }
-                    imgPtr += ByteOfSkip;
-                }
-            }
-            myBitmap.UnlockBits(byteArray);
-            return ImgData;
-        }
-
-        private static Bitmap array2bmp(int[] ImgData, int Width, int Height)
-        {
-            Bitmap myBitmap = new Bitmap(Width, Height, PixelFormat.Format24bppRgb);
-            BitmapData byteArray = myBitmap.LockBits(new Rectangle(0, 0, Width, Height),
-                                           ImageLockMode.WriteOnly,
-                                           PixelFormat.Format24bppRgb);
-            int ByteOfSkip = byteArray.Stride - myBitmap.Width * 3;
-            unsafe
-            {                                   // 指標取出影像資料
-                byte* imgPtr = (byte*)byteArray.Scan0;
-                for (int y = 0; y < Height; y++)
-                {
-                    for (int x = 0; x < Width; x++)
-                    {
-                        int index = x + Width * y;
-                        *imgPtr = (byte)ImgData[index];       //B
-                        *(imgPtr + 1) = (byte)ImgData[index]; //G
-                        *(imgPtr + 2) = (byte)ImgData[index]; //R
-                        imgPtr += 3;
-                    }
-                    imgPtr += ByteOfSkip; // 跳過Padding bytes
-                }
-            }
-            myBitmap.UnlockBits(byteArray);
-            return myBitmap;
         }
 
         private void button2_Click(object sender, EventArgs e)

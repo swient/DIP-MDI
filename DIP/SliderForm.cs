@@ -26,67 +26,44 @@ namespace DIP
             InitializeComponent();
         }
 
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe public static extern void brightness(int* f0, int w, int h, int s, int* g0);
-
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe public static extern void contrast(int* f0, int w, int h, double s, int* g0);
-
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe public static extern void averagefilter(int* f0, int w, int h, int s, int* g0);
-
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe public static extern void customrotationangle(int* f0, int w, int h, int s, int* g0);
-
         private void SliderForm_Load(object sender, EventArgs e)
         {
             bmp_dip(NpBitmap, pictureBox1);
             pBitmap = NpBitmap;
 
-            if (Select == 0)
+            switch (Select)
             {
-                label1.Text = "亮度";
-                // 設置最小值
-                trackBar1.Minimum = -255;
-                // 設置最大值
-                trackBar1.Maximum = 255;
-                // 設置初始值
-                trackBar1.Value = 0;
-                textBox1.Text = trackBar1.Value.ToString();
-                
-            }
-            else if (Select == 1)
-            {
-                label1.Text = "對比度";
-                // 設置最小值
-                trackBar1.Minimum = 0;
-                // 設置最大值
-                trackBar1.Maximum = 300;
-                // 設置初始值
-                trackBar1.Value = 100;
-                textBox1.Text = (trackBar1.Value/100).ToString();
-            }
-            else if (Select == 2)
-            {
-                label1.Text = "平均濾波";
-                // 設置最小值
-                trackBar1.Minimum = 1;
-                // 設置最大值
-                trackBar1.Maximum = 10;
-                // 設置初始值
-                trackBar1.Value = 1;
-                textBox1.Text = trackBar1.Value.ToString();
-            }
-            else if(Select == 3)
-            {
-                label1.Text = "自訂旋轉角度";
-                // 設置最小值
-                trackBar1.Minimum = 0;
-                // 設置最大值
-                trackBar1.Maximum = 360;
-                // 設置初始值
-                trackBar1.Value = 0;
-                textBox1.Text = trackBar1.Value.ToString();
+                case 0:
+                    label1.Text = "亮度";
+                    trackBar1.Minimum = -255;
+                    trackBar1.Maximum = 255;
+                    trackBar1.Value = 0;
+                    textBox1.Text = "0";
+                    break;
+
+                case 1:
+                    label1.Text = "對比度";
+                    trackBar1.Minimum = 0;
+                    trackBar1.Maximum = 300;
+                    trackBar1.Value = 100;
+                    textBox1.Text = "1";
+                    break;
+
+                case 2:
+                    label1.Text = "平均濾波";
+                    trackBar1.Minimum = 1;
+                    trackBar1.Maximum = 10;
+                    trackBar1.Value = 1;
+                    textBox1.Text = "1";
+                    break;
+
+                case 3:
+                    label1.Text = "自訂旋轉角度";
+                    trackBar1.Minimum = 0;
+                    trackBar1.Maximum = 360;
+                    trackBar1.Value = 0;
+                    textBox1.Text = "0";
+                    break;
             }
         }
 
@@ -98,7 +75,7 @@ namespace DIP
             pictureBox1.Width = NpBitmap.Width;
             pictureBox1.Height = NpBitmap.Height;
 
-            if (Select == 3)
+            if (Select == 3) // 自訂旋轉角度
             {
                 this.Width = (int)(NpBitmap.Width * 1.414) + (this.Width - this.ClientRectangle.Width) * 30;
                 this.Height = (int)(NpBitmap.Height * 1.414) + (this.Height - this.ClientRectangle.Height) + 100;
@@ -122,130 +99,79 @@ namespace DIP
             int[] f;
             int[] g;
 
-            if (Select == 0) // 亮度
+            switch (Select)
             {
-                textBox1.Text = trackBar1.Value.ToString();
+                case 0: // 亮度
+                    textBox1.Text = trackBar1.Value.ToString();
 
-                f = bmp2array(NpBitmap);
-                g = new int[NpBitmap.Width * NpBitmap.Height];
-                unsafe
-                {
-                    fixed (int* f0 = f) fixed (int* g0 = g)
+                    f = ImageProcessUtils.BitmapToArray(NpBitmap);
+                    g = new int[NpBitmap.Width * NpBitmap.Height];
+                    unsafe
                     {
-                        brightness(f0, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, g0);
+                        fixed (int* f0 = f) fixed (int* g0 = g)
+                        {
+                            ImageProcessUtils.brightness(f0, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, g0);
+                        }
                     }
-                }
 
-                pBitmap = array2bmp(g, NpBitmap.Width, NpBitmap.Height);
-            }
-            else if (Select == 1) // 對比度
-            {
-                double c = (double)trackBar1.Value / 100;
-                textBox1.Text = c.ToString();
+                    pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
+                    break;
 
-                f = bmp2array(NpBitmap);
-                g = new int[NpBitmap.Width * NpBitmap.Height];
-                unsafe
-                {
-                    fixed (int* f0 = f) fixed (int* g0 = g)
+                case 1: // 對比度
+                    double c = (double)trackBar1.Value / 100;
+                    textBox1.Text = ((double)trackBar1.Value / 100).ToString();
+
+                    f = ImageProcessUtils.BitmapToArray(NpBitmap);
+                    g = new int[NpBitmap.Width * NpBitmap.Height];
+                    unsafe
                     {
-                        contrast(f0, NpBitmap.Width, NpBitmap.Height, c, g0);
+                        fixed (int* f0 = f) fixed (int* g0 = g)
+                        {
+                            ImageProcessUtils.contrast(f0, NpBitmap.Width, NpBitmap.Height, c, g0);
+                        }
                     }
-                }
 
-                pBitmap = array2bmp(g, NpBitmap.Width, NpBitmap.Height);
-            }
-            else if (Select == 2) // 平均濾波
-            {
-                textBox1.Text = trackBar1.Value.ToString();
+                    pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
+                    break;
 
-                f = bmp2array(NpBitmap);
-                g = new int[NpBitmap.Width * NpBitmap.Height];
-                unsafe
-                {
-                    fixed (int* f0 = f) fixed (int* g0 = g)
+                case 2: // 平均濾波
+                    textBox1.Text = trackBar1.Value.ToString();
+
+                    f = ImageProcessUtils.BitmapToArray(NpBitmap);
+                    g = new int[NpBitmap.Width * NpBitmap.Height];
+                    unsafe
                     {
-                        averagefilter(f0, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, g0);
+                        fixed (int* f0 = f) fixed (int* g0 = g)
+                        {
+                            ImageProcessUtils.averagefilter(f0, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, g0);
+                        }
                     }
-                }
 
-                pBitmap = array2bmp(g, NpBitmap.Width, NpBitmap.Height);
-            }
-            else if (Select == 3) // 自訂旋轉角度
-            {
-                textBox1.Text = trackBar1.Value.ToString();
+                    pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
+                    break;
 
-                double theta;
-                theta = (double)trackBar1.Value * Math.PI / 180;
-                int new_weight = (int)(NpBitmap.Height * Math.Abs(Math.Sin(theta)) + NpBitmap.Width * Math.Abs(Math.Cos(theta)));
-                int new_height = (int)(NpBitmap.Height * Math.Abs(Math.Cos(theta)) + NpBitmap.Width * Math.Abs(Math.Sin(theta)));
+                case 3: // 自訂旋轉角度
+                    textBox1.Text = trackBar1.Value.ToString();
 
-                f = bmp2array(NpBitmap);
-                g = new int[new_weight * new_height];
-                unsafe
-                {
-                    fixed (int* f0 = f) fixed (int* g0 = g)
+                    double theta = (double)trackBar1.Value * Math.PI / 180;
+                    int new_weight = (int)(NpBitmap.Height * Math.Abs(Math.Sin(theta)) + NpBitmap.Width * Math.Abs(Math.Cos(theta)));
+                    int new_height = (int)(NpBitmap.Height * Math.Abs(Math.Cos(theta)) + NpBitmap.Width * Math.Abs(Math.Sin(theta)));
+
+                    f = ImageProcessUtils.BitmapToArray(NpBitmap);
+                    g = new int[new_weight * new_height];
+                    unsafe
                     {
-                        
-                        customrotationangle(f0, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, g0);
+                        fixed (int* f0 = f) fixed (int* g0 = g)
+                        {
+                            ImageProcessUtils.customrotationangle(f0, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, g0);
+                        }
                     }
-                }
 
-                pBitmap = array2bmp(g, new_weight, new_height);
+                    pBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
+                    break;
             }
 
             pictureBox1.Image = pBitmap;
-        }
-
-        private int[] bmp2array(Bitmap myBitmap)
-        {
-            int[] ImgData = new int[myBitmap.Width * myBitmap.Height];
-            BitmapData byteArray = myBitmap.LockBits(new Rectangle(0, 0, myBitmap.Width, myBitmap.Height),
-                                                    ImageLockMode.ReadWrite,
-                                                    myBitmap.PixelFormat);
-            int ByteOfSkip = byteArray.Stride - byteArray.Width * (int)(byteArray.Stride / myBitmap.Width);
-            unsafe
-            {
-                byte* imgPtr = (byte*)(byteArray.Scan0);
-                for (int y = 0; y < byteArray.Height; y++)
-                {
-                    for (int x = 0; x < byteArray.Width; x++)
-                    {
-                        ImgData[x + byteArray.Width * y] = (int)*(imgPtr);
-                        imgPtr += (int)(byteArray.Stride / myBitmap.Width);
-                    }
-                    imgPtr += ByteOfSkip;
-                }
-            }
-            myBitmap.UnlockBits(byteArray);
-            return ImgData;
-        }
-
-        private static Bitmap array2bmp(int[] ImgData, int Width, int Height)
-        {
-            Bitmap myBitmap = new Bitmap(Width, Height, PixelFormat.Format24bppRgb);
-            BitmapData byteArray = myBitmap.LockBits(new Rectangle(0, 0, Width, Height),
-                                           ImageLockMode.WriteOnly,
-                                           PixelFormat.Format24bppRgb);
-            int ByteOfSkip = byteArray.Stride - myBitmap.Width * 3;
-            unsafe
-            {                                   // 指標取出影像資料
-                byte* imgPtr = (byte*)byteArray.Scan0;
-                for (int y = 0; y < Height; y++)
-                {
-                    for (int x = 0; x < Width; x++)
-                    {
-                        int index = x + Width * y;
-                        *imgPtr = (byte)ImgData[index];       //B
-                        *(imgPtr + 1) = (byte)ImgData[index]; //G
-                        *(imgPtr + 2) = (byte)ImgData[index]; //R
-                        imgPtr += 3;
-                    }
-                    imgPtr += ByteOfSkip; // 跳過Padding bytes
-                }
-            }
-            myBitmap.UnlockBits(byteArray);
-            return myBitmap;
         }
 
         private void button1_Click(object sender, EventArgs e)

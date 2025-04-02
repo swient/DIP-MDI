@@ -22,25 +22,18 @@ namespace DIP
             InitializeComponent();
         }
 
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe public static extern void negative(int* f0, int w, int h, int* g0);
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe public static extern void mosaic(int* f0, int w, int h, int* g0);
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe public static extern void histogram(int* f0, int w, int h, int* g0);
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe public static extern void equalization(int* f0, int w, int h, int* g0);
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe public static extern void highpassfilter(int* f0, int w, int h, int* g0);
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe public static extern void customrotationangle(int* f0, int w, int h, int s, int* g0);
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe public static extern void zoom(int* f0, int w, int h, double s, int* g0);
-
         private void DIPSample_Load(object sender, EventArgs e)
         {
             this.IsMdiContainer = true; // 設定為 MDI 容器
             this.toolStripStatusLabel1.Text = "";
+        }
+
+        private Bitmap bmp_read(OpenFileDialog oFileDlg)
+        {
+            Bitmap pBitmap;
+            string fileloc = oFileDlg.FileName;
+            pBitmap = new Bitmap(fileloc);
+            return pBitmap;
         }
 
         private void 開啟ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -123,7 +116,7 @@ namespace DIP
                     if (cF is MSForm msForm)
                     {
                         // 將 Bitmap 轉換為陣列
-                        int[] f = bmp2array(msForm.pBitmap);
+                        int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);
                         int[] g = new int[msForm.pBitmap.Width * msForm.pBitmap.Height]; // 假設 w 和 h 是圖片的寬高
 
                         // 使用 unsafe 區域進行指針處理
@@ -131,11 +124,11 @@ namespace DIP
                         {
                             fixed (int* f0 = f) fixed (int* g0 = g)
                             {
-                                negative(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, g0); // 進行負片轉換的處理
+                                ImageProcessUtils.negative(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, g0); // 進行負片轉換的處理
                             }
                         }
                         // 將處理後的陣列轉換回 Bitmap
-                        NpBitmap = array2bmp(g, msForm.pBitmap.Width, msForm.pBitmap.Height);
+                        NpBitmap = ImageProcessUtils.ArrayToBitmap(g, msForm.pBitmap.Width, msForm.pBitmap.Height);
                     }
                     else
                     {
@@ -171,7 +164,7 @@ namespace DIP
                     if (cF is MSForm msForm)
                     {
                         // 將 Bitmap 轉換為陣列
-                        int[] f = bmp2array(msForm.pBitmap);
+                        int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);
                         int[] g = new int[msForm.pBitmap.Width * msForm.pBitmap.Height]; // 假設 w 和 h 是圖片的寬高
 
                         // 使用 unsafe 區域進行指針處理
@@ -179,12 +172,12 @@ namespace DIP
                         {
                             fixed (int* f0 = f) fixed (int* g0 = g)
                             {
-                                mosaic(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, g0); // 進行局部馬賽克的處理
+                                ImageProcessUtils.mosaic(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, g0); // 進行局部馬賽克的處理
                             }
                         }
 
                         // 將處理後的陣列轉換回 Bitmap
-                        NpBitmap = array2bmp(g, msForm.pBitmap.Width, msForm.pBitmap.Height);
+                        NpBitmap = ImageProcessUtils.ArrayToBitmap(g, msForm.pBitmap.Width, msForm.pBitmap.Height);
                     }
                     else
                     {
@@ -290,7 +283,7 @@ namespace DIP
                     if (cF is MSForm msForm)
                     {
                         // 將 Bitmap 轉換為陣列
-                        int[] f = bmp2array(msForm.pBitmap);
+                        int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);
                         int[] g = new int[msForm.pBitmap.Width * msForm.pBitmap.Height]; // 假設 w 和 h 是圖片的寬高
 
                         // 使用 unsafe 區域進行指針處理
@@ -298,12 +291,12 @@ namespace DIP
                         {
                             fixed (int* f0 = f) fixed (int* g0 = g)
                             {
-                                equalization(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, g0); // 進行均衡化的處理
+                                ImageProcessUtils.equalization(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, g0); // 進行均衡化的處理
                             }
                         }
 
                         // 將處理後的陣列轉換回 Bitmap
-                        NpBitmap = array2bmp(g, msForm.pBitmap.Width, msForm.pBitmap.Height);
+                        NpBitmap = ImageProcessUtils.ArrayToBitmap(g, msForm.pBitmap.Width, msForm.pBitmap.Height);
                     }
                     else
                     {
@@ -339,7 +332,7 @@ namespace DIP
                     if (cF is MSForm msForm)
                     {
                         // 將 Bitmap 轉換為陣列
-                        int[] f = bmp2array(msForm.pBitmap);
+                        int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);
                         int[] g = new int[256 * 256]; // 假設 w 和 h 是圖片的寬高
 
                         // 使用 unsafe 區域進行指針處理
@@ -347,12 +340,12 @@ namespace DIP
                         {
                             fixed (int* f0 = f) fixed (int* g0 = g)
                             {
-                                histogram(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, g0); // 進行直方圖的計算
+                                ImageProcessUtils.histogram(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, g0); // 進行直方圖的計算
                             }
                         }
 
                         // 將處理後的陣列轉換回 Bitmap
-                        NpBitmap = array2bmp(g, 256, 256);
+                        NpBitmap = ImageProcessUtils.ArrayToBitmap(g, 256, 256);
                     }
                     else
                     {
@@ -424,7 +417,7 @@ namespace DIP
                     if (cF is MSForm msForm)
                     {
                         // 將 Bitmap 轉換為陣列
-                        int[] f = bmp2array(msForm.pBitmap);
+                        int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);
                         int[] g = new int[msForm.pBitmap.Width * msForm.pBitmap.Height]; // 假設 w 和 h 是圖片的寬高
 
                         // 使用 unsafe 區域進行指針處理
@@ -432,12 +425,12 @@ namespace DIP
                         {
                             fixed (int* f0 = f) fixed (int* g0 = g)
                             {
-                                highpassfilter(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, g0); // 進行高通濾波器的處理
+                                ImageProcessUtils.highpassfilter(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, g0); // 進行高通濾波器的處理
                             }
                         }
 
                         // 將處理後的陣列轉換回 Bitmap
-                        NpBitmap = array2bmp(g, msForm.pBitmap.Width, msForm.pBitmap.Height);
+                        NpBitmap = ImageProcessUtils.ArrayToBitmap(g, msForm.pBitmap.Width, msForm.pBitmap.Height);
                     }
                     else
                     {
@@ -510,7 +503,7 @@ namespace DIP
                         int new_height = (int)(msForm.pBitmap.Height * Math.Abs(Math.Cos(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Sin(theta)));
 
                         // 將 Bitmap 轉換為陣列
-                        int[] f = bmp2array(msForm.pBitmap);
+                        int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);
                         int[] g = new int[new_weight * new_height]; // 假設 w 和 h 是圖片的寬高
 
                         // 使用 unsafe 區域進行指針處理
@@ -518,12 +511,12 @@ namespace DIP
                         {
                             fixed (int* f0 = f) fixed (int* g0 = g)
                             {
-                                customrotationangle(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, 90, g0);
+                                ImageProcessUtils.customrotationangle(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, 90, g0);
                             }
                         }
 
                         // 將處理後的陣列轉換回 Bitmap
-                        NpBitmap = array2bmp(g, new_weight, new_height);
+                        NpBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
                     }
                     else
                     {
@@ -562,7 +555,7 @@ namespace DIP
                         int new_height = (int)(msForm.pBitmap.Height * Math.Abs(Math.Cos(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Sin(theta)));
 
                         // 將 Bitmap 轉換為陣列
-                        int[] f = bmp2array(msForm.pBitmap);
+                        int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);
                         int[] g = new int[new_weight * new_height]; // 假設 w 和 h 是圖片的寬高
 
                         // 使用 unsafe 區域進行指針處理
@@ -570,12 +563,12 @@ namespace DIP
                         {
                             fixed (int* f0 = f) fixed (int* g0 = g)
                             {
-                                customrotationangle(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, 180, g0);
+                                ImageProcessUtils.customrotationangle(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, 180, g0);
                             }
                         }
 
                         // 將處理後的陣列轉換回 Bitmap
-                        NpBitmap = array2bmp(g, new_weight, new_height);
+                        NpBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
                     }
                     else
                     {
@@ -614,7 +607,7 @@ namespace DIP
                         int new_height = (int)(msForm.pBitmap.Height * Math.Abs(Math.Cos(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Sin(theta)));
 
                         // 將 Bitmap 轉換為陣列
-                        int[] f = bmp2array(msForm.pBitmap);
+                        int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);
                         int[] g = new int[new_weight * new_height]; // 假設 w 和 h 是圖片的寬高
 
                         // 使用 unsafe 區域進行指針處理
@@ -622,12 +615,12 @@ namespace DIP
                         {
                             fixed (int* f0 = f) fixed (int* g0 = g)
                             {
-                                customrotationangle(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, 270, g0);
+                                ImageProcessUtils.customrotationangle(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, 270, g0);
                             }
                         }
 
                         // 將處理後的陣列轉換回 Bitmap
-                        NpBitmap = array2bmp(g, new_weight, new_height);
+                        NpBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
                     }
                     else
                     {
@@ -811,7 +804,7 @@ namespace DIP
                             int new_height = (int)Math.Round(msForm.pBitmap.Height * scale);
 
                             // 將 Bitmap 轉換為陣列
-                            int[] f = bmp2array(msForm.pBitmap);
+                            int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);
                             int[] g = new int[new_weight * new_height];
 
                             // 使用 unsafe 區域進行指針處理
@@ -819,12 +812,12 @@ namespace DIP
                             {
                                 fixed (int* f0 = f) fixed (int* g0 = g)
                                 {
-                                    zoom(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, scale, g0); // 進行放大的處理
+                                    ImageProcessUtils.zoom(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, scale, g0); // 進行放大的處理
                                 }
                             }
 
                             // 將處理後的陣列轉換回 Bitmap
-                            NpBitmap = array2bmp(g, new_weight, new_height);
+                            NpBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
                         }
                         else
                         {
@@ -882,7 +875,7 @@ namespace DIP
                             int new_height = (int)Math.Round(msForm.pBitmap.Height * scale);
                             
                             // 將 Bitmap 轉換為陣列
-                            int[] f = bmp2array(msForm.pBitmap);
+                            int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);
                             int[] g = new int[new_weight * new_height];
 
                             // 使用 unsafe 區域進行指針處理
@@ -890,12 +883,12 @@ namespace DIP
                             {
                                 fixed (int* f0 = f) fixed (int* g0 = g)
                                 {
-                                    zoom(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, scale, g0); // 進行縮小的處理
+                                    ImageProcessUtils.zoom(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, scale, g0); // 進行縮小的處理
                                 }
                             }
 
                             // 將處理後的陣列轉換回 Bitmap
-                            NpBitmap = array2bmp(g, new_weight, new_height);
+                            NpBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
                         }
                         else
                         {
@@ -918,98 +911,6 @@ namespace DIP
             childForm.pf1 = toolStripStatusLabel1;
             childForm.pBitmap = NpBitmap;
             childForm.Show();
-        }
-
-        private Bitmap bmp_read(OpenFileDialog oFileDlg)
-        {
-            Bitmap pBitmap;
-            string fileloc = oFileDlg.FileName;
-            pBitmap = new Bitmap(fileloc);
-            return pBitmap;
-        }
-
-        private int[] bmp2array(Bitmap myBitmap)
-        {
-            int[] ImgData = new int[myBitmap.Width * myBitmap.Height];
-            BitmapData byteArray = myBitmap.LockBits(new Rectangle(0, 0, myBitmap.Width, myBitmap.Height),
-                                                    ImageLockMode.ReadWrite,
-                                                    myBitmap.PixelFormat);
-            int ByteOfSkip = byteArray.Stride - byteArray.Width * (int)(byteArray.Stride / myBitmap.Width);
-
-            // 判斷圖像格式
-            bool isGrayscale = (myBitmap.PixelFormat == PixelFormat.Format8bppIndexed);
-            bool is32bpp = (myBitmap.PixelFormat == PixelFormat.Format32bppArgb ||
-                            myBitmap.PixelFormat == PixelFormat.Format32bppRgb);
-
-            unsafe
-            {
-                byte* imgPtr = (byte*)(byteArray.Scan0);
-
-                for (int y = 0; y < byteArray.Height; y++)
-                {
-                    for (int x = 0; x < byteArray.Width; x++)
-                    {
-                        int index = x + byteArray.Width * y;
-
-                        if (isGrayscale)
-                        {
-                            ImgData[index] = (int)*(imgPtr);
-                            imgPtr++; // 每個灰階像素佔用 1 byte
-                        }
-                        else
-                        {
-                            byte blue = imgPtr[0];
-                            byte green = imgPtr[1];
-                            byte red = imgPtr[2];
-                            byte alpha = is32bpp ? imgPtr[3] : (byte)0; // 32bpp圖像有alpha通道
-
-                            // 計算灰階值
-                            int grayValue = (int)(0.3 * red + 0.59 * green + 0.11 * blue);
-                            ImgData[index] = grayValue;
-
-                            imgPtr += is32bpp ? 4 : 3;
-                        }
-                    }
-                    imgPtr += ByteOfSkip;
-                }
-            }
-
-            myBitmap.UnlockBits(byteArray);
-            return ImgData;
-        }
-
-        private static Bitmap array2bmp(int[] ImgData, int Width, int Height)
-        {
-            Bitmap myBitmap = new Bitmap(Width, Height, PixelFormat.Format24bppRgb);
-            BitmapData byteArray = myBitmap.LockBits(new Rectangle(0, 0, Width, Height),
-                                           ImageLockMode.WriteOnly,
-                                           PixelFormat.Format24bppRgb);
-            int ByteOfSkip = byteArray.Stride - Width * 3;
-
-            unsafe
-            {
-                byte* imgPtr = (byte*)byteArray.Scan0;
-
-                for (int y = 0; y < Height; y++)
-                {
-                    for (int x = 0; x < Width; x++)
-                    {
-                        int index = x + Width * y;
-                        byte grayValue = (byte)ImgData[index];
-
-                        // 設定 R, G, B 為相同的灰階值
-                        *imgPtr = grayValue;       // B
-                        *(imgPtr + 1) = grayValue; // G
-                        *(imgPtr + 2) = grayValue; // R
-
-                        imgPtr += 3;
-                    }
-                    imgPtr += ByteOfSkip;
-                }
-            }
-
-            myBitmap.UnlockBits(byteArray);
-            return myBitmap;
         }
     }
 }
