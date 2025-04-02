@@ -20,6 +20,10 @@ namespace DIP
         internal Bitmap pBitmap;
         internal ToolStripStatusLabel pf1;
         public new int Select;
+        private bool isSelecting = false; // 是否正在框選
+        private Point selectionStart; // 框選的起始點
+        private Point selectionEnd; // 框選的結束點
+        private Rectangle selectionRect; // 當前框選區域
 
         public SliderForm()
         {
@@ -63,6 +67,14 @@ namespace DIP
                     trackBar1.Maximum = 360;
                     trackBar1.Value = 0;
                     textBox1.Text = "0";
+                    break;
+
+                case 4:
+                    label1.Text = "局部馬賽克";
+                    trackBar1.Minimum = 1;
+                    trackBar1.Maximum = 10;
+                    trackBar1.Value = 3;
+                    textBox1.Text = "3";
                     break;
             }
         }
@@ -154,8 +166,8 @@ namespace DIP
                     textBox1.Text = trackBar1.Value.ToString();
 
                     double theta = (double)trackBar1.Value * Math.PI / 180;
-                    int new_weight = (int)(NpBitmap.Height * Math.Abs(Math.Sin(theta)) + NpBitmap.Width * Math.Abs(Math.Cos(theta)));
-                    int new_height = (int)(NpBitmap.Height * Math.Abs(Math.Cos(theta)) + NpBitmap.Width * Math.Abs(Math.Sin(theta)));
+                    int new_weight = (int)Math.Round(NpBitmap.Height * Math.Abs(Math.Sin(theta)) + NpBitmap.Width * Math.Abs(Math.Cos(theta)));
+                    int new_height = (int)Math.Round(NpBitmap.Height * Math.Abs(Math.Cos(theta)) + NpBitmap.Width * Math.Abs(Math.Sin(theta)));
 
                     f = ImageProcessUtils.BitmapToArray(NpBitmap);
                     g = new int[new_weight * new_height];
@@ -169,9 +181,81 @@ namespace DIP
 
                     pBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
                     break;
+
+                case 4: // 局部馬賽克
+                    textBox1.Text = trackBar1.Value.ToString();
+
+                    int[] customlocation = new int[4];
+                    customlocation[0] = selectionStart.X;
+                    customlocation[1] = selectionStart.Y;
+                    customlocation[2] = selectionEnd.X;
+                    customlocation[3] = selectionEnd.Y;
+
+                    f = ImageProcessUtils.BitmapToArray(NpBitmap);
+                    g = new int[NpBitmap.Width * NpBitmap.Height];
+                    unsafe
+                    {
+                        fixed (int* f0 = f) fixed (int* g0 = g)
+                        {
+                            ImageProcessUtils.mosaic(f0, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, customlocation, g0);
+                        }
+                    }
+
+                    pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
+                    break;
             }
 
             pictureBox1.Image = pBitmap;
+        }
+
+        private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (Select == 4 && e.Button == MouseButtons.Left)  // 只有在局部馬賽克時才啟用框選
+            {
+                isSelecting = true;
+                selectionStart = e.Location;  // 紀錄滑鼠按下的起始位置
+            }
+        }
+
+        private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isSelecting)
+            {
+                // 更新矩形框的寬度和高度
+                int width = e.X - selectionStart.X;
+                int height = e.Y - selectionStart.Y;
+
+                selectionRect = new Rectangle(selectionStart.X, selectionStart.Y, width, height);
+                pictureBox1.Invalidate();  // 強制重繪
+            }
+        }
+
+        private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (isSelecting)
+            {
+                isSelecting = false;
+                // 紀錄框選结束的點
+                selectionEnd = e.Location;
+
+                trackBar1_Scroll(sender, e);
+
+                // 清除矩形
+                selectionRect = Rectangle.Empty;
+                pictureBox1.Invalidate(); // 強制重繪
+            }
+        }
+
+        private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        {
+            if (Select == 4 && selectionRect.Width > 0 && selectionRect.Height > 0)
+            {
+                // 绘制红色的矩形框
+                using (Pen pen = new Pen(Color.Red, 2))
+                {
+                    e.Graphics.DrawRectangle(pen, selectionRect);  // 绘制矩形框
+                }
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)

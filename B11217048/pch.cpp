@@ -61,12 +61,12 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) void mosaic(int* f, int w, int h, int* g)
+    __declspec(dllexport) void mosaic(int* f, int w, int h, int s, int* c, int* g)
     {
-        int x_start = 100, x_end = 200;
-        int y_start = 100, y_end = 200;
+        int x_start = c[0], x_end = c[2];
+        int y_start = c[1], y_end = c[3];
 
-        int block_size = 4;
+        int block_size = s;
 
         // 複製原圖 f 到結果圖 g
         for (int i = 0; i < w * h; i++) {
@@ -346,8 +346,8 @@ extern "C" {
         const double M_PI = 3.14159265358979323846;
         double theta = a * M_PI / 180.0;
 
-        int nw = (int)(h * std::abs(sin(theta)) + w * std::abs(cos(theta)));
-        int nh = (int)(w * std::abs(sin(theta)) + h * std::abs(cos(theta)));
+        int nw = (int)round(h * std::abs(sin(theta)) + w * std::abs(cos(theta)));
+        int nh = (int)round(w * std::abs(sin(theta)) + h * std::abs(cos(theta)));
 
         for (int i = 0; i < nw * nh; i++)
         {

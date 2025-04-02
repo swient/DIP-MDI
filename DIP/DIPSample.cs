@@ -155,7 +155,6 @@ namespace DIP
                 return;
             }
 
-            // 遍歷所有 MDI 子視窗，尋找當前聚焦的視窗
             foreach (Form cF in MdiChildren)
             {
                 if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
@@ -163,21 +162,7 @@ namespace DIP
                     // 確認視窗類型為 MSForm
                     if (cF is MSForm msForm)
                     {
-                        // 將 Bitmap 轉換為陣列
-                        int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);
-                        int[] g = new int[msForm.pBitmap.Width * msForm.pBitmap.Height]; // 假設 w 和 h 是圖片的寬高
-
-                        // 使用 unsafe 區域進行指針處理
-                        unsafe
-                        {
-                            fixed (int* f0 = f) fixed (int* g0 = g)
-                            {
-                                ImageProcessUtils.mosaic(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, g0); // 進行局部馬賽克的處理
-                            }
-                        }
-
-                        // 將處理後的陣列轉換回 Bitmap
-                        NpBitmap = ImageProcessUtils.ArrayToBitmap(g, msForm.pBitmap.Width, msForm.pBitmap.Height);
+                        NpBitmap = new Bitmap(msForm.pBitmap);
                     }
                     else
                     {
@@ -189,10 +174,11 @@ namespace DIP
                 }
             }
 
-            MSForm childForm = new MSForm();
+            SliderForm childForm = new SliderForm();
+            childForm.Select = 4;
             childForm.MdiParent = this;
             childForm.pf1 = toolStripStatusLabel1;
-            childForm.pBitmap = NpBitmap;
+            childForm.NpBitmap = NpBitmap;
             childForm.Show();
         }
 
@@ -499,8 +485,8 @@ namespace DIP
                     if (cF is MSForm msForm)
                     {
                         double theta = 90 * Math.PI / 180;
-                        int new_weight = (int)(msForm.pBitmap.Height * Math.Abs(Math.Sin(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Cos(theta)));
-                        int new_height = (int)(msForm.pBitmap.Height * Math.Abs(Math.Cos(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Sin(theta)));
+                        int new_weight = (int)Math.Round(msForm.pBitmap.Height * Math.Abs(Math.Sin(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Cos(theta)));
+                        int new_height = (int)Math.Round(msForm.pBitmap.Height * Math.Abs(Math.Cos(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Sin(theta)));
 
                         // 將 Bitmap 轉換為陣列
                         int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);
@@ -551,8 +537,8 @@ namespace DIP
                     if (cF is MSForm msForm)
                     {
                         double theta = 180 * Math.PI / 180;
-                        int new_weight = (int)(msForm.pBitmap.Height * Math.Abs(Math.Sin(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Cos(theta)));
-                        int new_height = (int)(msForm.pBitmap.Height * Math.Abs(Math.Cos(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Sin(theta)));
+                        int new_weight = (int)Math.Round(msForm.pBitmap.Height * Math.Abs(Math.Sin(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Cos(theta)));
+                        int new_height = (int)Math.Round(msForm.pBitmap.Height * Math.Abs(Math.Cos(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Sin(theta)));
 
                         // 將 Bitmap 轉換為陣列
                         int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);
@@ -603,8 +589,8 @@ namespace DIP
                     if (cF is MSForm msForm)
                     {
                         double theta = 270 * Math.PI / 180;
-                        int new_weight = (int)(msForm.pBitmap.Height * Math.Abs(Math.Sin(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Cos(theta)));
-                        int new_height = (int)(msForm.pBitmap.Height * Math.Abs(Math.Cos(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Sin(theta)));
+                        int new_weight = (int)Math.Round(msForm.pBitmap.Height * Math.Abs(Math.Sin(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Cos(theta)));
+                        int new_height = (int)Math.Round(msForm.pBitmap.Height * Math.Abs(Math.Cos(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Sin(theta)));
 
                         // 將 Bitmap 轉換為陣列
                         int[] f = ImageProcessUtils.BitmapToArray(msForm.pBitmap);

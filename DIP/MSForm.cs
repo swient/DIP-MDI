@@ -47,6 +47,15 @@ namespace DIP
             pictureBox1.Image = pBitmap;
             pictureBox1.Width = pBitmap.Width;
             pictureBox1.Height = pBitmap.Height;
+
+            if (pBitmap.Width < 255 || pBitmap.Height < 255)
+            {
+                this.Width = 255 + (this.Width - this.ClientRectangle.Width);
+                this.Height = 255 + (this.Height - this.ClientRectangle.Height);
+                pictureBox1.Width = 255;
+                pictureBox1.Height = 255;
+                pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
+            }
         }
 
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)

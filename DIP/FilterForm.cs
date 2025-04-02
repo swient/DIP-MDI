@@ -71,17 +71,22 @@ namespace DIP
         {
             int[] f;
             int[] g;
-            int divide = textBox10.Text == "" ? 9 : int.Parse(textBox10.Text);
+            int divide;
             int[] customize = new int[9];
-            customize[0] = textBox1.Text == "" ? 1 : int.Parse(textBox1.Text);
-            customize[1] = textBox2.Text == "" ? 1 : int.Parse(textBox2.Text);
-            customize[2] = textBox3.Text == "" ? 1 : int.Parse(textBox3.Text);
-            customize[3] = textBox4.Text == "" ? 1 : int.Parse(textBox4.Text);
-            customize[4] = textBox5.Text == "" ? 1 : int.Parse(textBox5.Text);
-            customize[5] = textBox6.Text == "" ? 1 : int.Parse(textBox6.Text);
-            customize[6] = textBox7.Text == "" ? 1 : int.Parse(textBox7.Text);
-            customize[7] = textBox8.Text == "" ? 1 : int.Parse(textBox8.Text);
-            customize[8] = textBox9.Text == "" ? 1 : int.Parse(textBox9.Text);
+            if (!int.TryParse(textBox1.Text, out customize[0]) ||
+                !int.TryParse(textBox2.Text, out customize[1]) ||
+                !int.TryParse(textBox3.Text, out customize[2]) ||
+                !int.TryParse(textBox4.Text, out customize[3]) ||
+                !int.TryParse(textBox5.Text, out customize[4]) ||
+                !int.TryParse(textBox6.Text, out customize[5]) ||
+                !int.TryParse(textBox7.Text, out customize[6]) ||
+                !int.TryParse(textBox8.Text, out customize[7]) ||
+                !int.TryParse(textBox9.Text, out customize[8]) ||
+                !int.TryParse(textBox10.Text, out divide))
+            {
+                MessageBox.Show("請輸入有效的數字！");
+                return;
+            }
 
             if (divide == 0)
             {
