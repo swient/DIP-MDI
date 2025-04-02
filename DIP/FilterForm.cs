@@ -167,7 +167,5 @@ namespace DIP
             msForm.Show();
             this.Close();
         }
-
-        
     }
 }

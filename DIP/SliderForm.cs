@@ -36,7 +36,7 @@ namespace DIP
         unsafe public static extern void averagefilter(int* f0, int w, int h, int s, int* g0);
 
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe public static extern void customrotationangle(int* f0, int w, int h, int a, int* g0);
+        unsafe public static extern void customrotationangle(int* f0, int w, int h, int s, int* g0);
 
         private void SliderForm_Load(object sender, EventArgs e)
         {
@@ -175,11 +175,12 @@ namespace DIP
             {
                 textBox1.Text = trackBar1.Value.ToString();
 
-                f = bmp2array(NpBitmap);
                 double theta;
                 theta = (double)trackBar1.Value * Math.PI / 180;
                 int new_weight = (int)(NpBitmap.Height * Math.Abs(Math.Sin(theta)) + NpBitmap.Width * Math.Abs(Math.Cos(theta)));
                 int new_height = (int)(NpBitmap.Height * Math.Abs(Math.Cos(theta)) + NpBitmap.Width * Math.Abs(Math.Sin(theta)));
+
+                f = bmp2array(NpBitmap);
                 g = new int[new_weight * new_height];
                 unsafe
                 {

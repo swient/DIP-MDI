@@ -32,6 +32,8 @@ namespace DIP
         unsafe public static extern void equalization(int* f0, int w, int h, int* g0);
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
         unsafe public static extern void highpassfilter(int* f0, int w, int h, int* g0);
+        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
+        unsafe public static extern void customrotationangle(int* f0, int w, int h, int s, int* g0);
 
         private void DIPSample_Load(object sender, EventArgs e)
         {
@@ -302,7 +304,7 @@ namespace DIP
                         {
                             fixed (int* f0 = f) fixed (int* g0 = g)
                             {
-                                equalization(f0, w, h, g0); // 進行局部馬賽克的處理
+                                equalization(f0, w, h, g0); // 進行均衡化的處理
                             }
                         }
 
@@ -436,7 +438,7 @@ namespace DIP
                         {
                             fixed (int* f0 = f) fixed (int* g0 = g)
                             {
-                                highpassfilter(f0, w, h, g0); // 進行局部馬賽克的處理
+                                highpassfilter(f0, w, h, g0); // 進行高通濾波器的處理
                             }
                         }
 
@@ -509,23 +511,25 @@ namespace DIP
                     }
                     else if (cF is MSForm msForm)
                     {
-                        Bitmap rotatedBitmap = new Bitmap(msForm.pBitmap.Height, msForm.pBitmap.Width); // 90° 旋轉後寬高互換
+                        double theta = 90 * Math.PI / 180;
+                        int new_weight = (int)(msForm.pBitmap.Height * Math.Abs(Math.Sin(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Cos(theta)));
+                        int new_height = (int)(msForm.pBitmap.Height * Math.Abs(Math.Cos(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Sin(theta)));
 
-                        // 遍歷原圖的每個像素
-                        for (int y = 0; y < msForm.pBitmap.Height; y++)
+                        // 將 Bitmap 轉換為陣列
+                        int[] f = bmp2array(msForm.pBitmap);
+                        int[] g = new int[new_weight * new_height]; // 假設 w 和 h 是圖片的寬高
+
+                        // 使用 unsafe 區域進行指針處理
+                        unsafe
                         {
-                            for (int x = 0; x < msForm.pBitmap.Width; x++)
+                            fixed (int* f0 = f) fixed (int* g0 = g)
                             {
-                                // 計算 90° 旋轉後的位置
-                                int newX = msForm.pBitmap.Height - 1 - y;
-                                int newY = x;
-
-                                // 設定像素
-                                rotatedBitmap.SetPixel(newX, newY, msForm.pBitmap.GetPixel(x, y));
+                                customrotationangle(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, 90, g0);
                             }
                         }
 
-                        NpBitmap = rotatedBitmap;
+                        // 將處理後的陣列轉換回 Bitmap
+                        NpBitmap = array2bmp(g, new_weight, new_height);
                     }
                     
                     break; // 找到聚焦的視窗後跳出迴圈
@@ -559,24 +563,27 @@ namespace DIP
                     }
                     else if (cF is MSForm msForm)
                     {
-                        Bitmap rotatedBitmap = new Bitmap(msForm.pBitmap.Width, msForm.pBitmap.Height); // 180° 旋轉後大小不變
-                                                                                                 // 遍歷原圖的每個像素
-                        for (int y = 0; y < msForm.pBitmap.Height; y++)
-                        {
-                            for (int x = 0; x < msForm.pBitmap.Width; x++)
-                            {
-                                // 計算 180° 旋轉後的位置
-                                int newX = msForm.pBitmap.Width - 1 - x;
-                                int newY = msForm.pBitmap.Height - 1 - y;
+                        double theta = 180 * Math.PI / 180;
+                        int new_weight = (int)(msForm.pBitmap.Height * Math.Abs(Math.Sin(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Cos(theta)));
+                        int new_height = (int)(msForm.pBitmap.Height * Math.Abs(Math.Cos(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Sin(theta)));
 
-                                // 設定像素
-                                rotatedBitmap.SetPixel(newX, newY, msForm.pBitmap.GetPixel(x, y));
+                        // 將 Bitmap 轉換為陣列
+                        int[] f = bmp2array(msForm.pBitmap);
+                        int[] g = new int[new_weight * new_height]; // 假設 w 和 h 是圖片的寬高
+
+                        // 使用 unsafe 區域進行指針處理
+                        unsafe
+                        {
+                            fixed (int* f0 = f) fixed (int* g0 = g)
+                            {
+                                customrotationangle(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, 180, g0);
                             }
                         }
 
-                        NpBitmap = rotatedBitmap;
+                        // 將處理後的陣列轉換回 Bitmap
+                        NpBitmap = array2bmp(g, new_weight, new_height);
                     }
-                    
+
                     break; // 找到聚焦的視窗後跳出迴圈
                 }
             }
@@ -608,24 +615,27 @@ namespace DIP
                     }
                     else if (cF is MSForm msForm)
                     {
-                        Bitmap rotatedBitmap = new Bitmap(msForm.pBitmap.Height, msForm.pBitmap.Width); // 270° 旋轉後寬高互換
-                        // 遍歷原圖的每個像素
-                        for (int y = 0; y < msForm.pBitmap.Height; y++)
-                        {
-                            for (int x = 0; x < msForm.pBitmap.Width; x++)
-                            {
-                                // 計算 270° 旋轉後的位置
-                                int newX = y;
-                                int newY = msForm.pBitmap.Width - 1 - x;
+                        double theta = 270 * Math.PI / 180;
+                        int new_weight = (int)(msForm.pBitmap.Height * Math.Abs(Math.Sin(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Cos(theta)));
+                        int new_height = (int)(msForm.pBitmap.Height * Math.Abs(Math.Cos(theta)) + msForm.pBitmap.Width * Math.Abs(Math.Sin(theta)));
 
-                                // 設定像素
-                                rotatedBitmap.SetPixel(newX, newY, msForm.pBitmap.GetPixel(x, y));
+                        // 將 Bitmap 轉換為陣列
+                        int[] f = bmp2array(msForm.pBitmap);
+                        int[] g = new int[new_weight * new_height]; // 假設 w 和 h 是圖片的寬高
+
+                        // 使用 unsafe 區域進行指針處理
+                        unsafe
+                        {
+                            fixed (int* f0 = f) fixed (int* g0 = g)
+                            {
+                                customrotationangle(f0, msForm.pBitmap.Width, msForm.pBitmap.Height, 270, g0);
                             }
                         }
 
-                        NpBitmap = rotatedBitmap;
+                        // 將處理後的陣列轉換回 Bitmap
+                        NpBitmap = array2bmp(g, new_weight, new_height);
                     }
-                    
+
                     break; // 找到聚焦的視窗後跳出迴圈
                 }
             }
