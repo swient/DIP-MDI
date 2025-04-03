@@ -14,6 +14,7 @@ using OxyPlot;
 using OxyPlot.Series;
 using OxyPlot.Axes;
 using OxyPlot.WindowsForms;
+using System.IO;
 
 namespace DIP
 {
@@ -32,74 +33,94 @@ namespace DIP
             this.toolStripStatusLabel1.Text = "";
         }
 
-        private Bitmap bmp_read(OpenFileDialog oFileDlg)
-        {
-            Bitmap pBitmap;
-            string fileloc = oFileDlg.FileName;
-            pBitmap = new Bitmap(fileloc);
-            return pBitmap;
-        }
-
         private void 開啟ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            openFileDialog1.CheckFileExists = true; // 檢查檔案是否存在
-            openFileDialog1.CheckPathExists = true; // 檢查路徑是否存在
-            openFileDialog1.Title = "Open File - DIP Sample";
-            openFileDialog1.ValidateNames = true; // 驗證檔案名稱是否有效
-            openFileDialog1.Filter = "bmp files (*.bmp)|*.bmp";
-            openFileDialog1.FileName = "";
-
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            using (var openFileDialog = new OpenFileDialog())
             {
-                MSForm childForm = new MSForm();
-                childForm.MdiParent = this;
-                childForm.pf1 = toolStripStatusLabel1;
-                NpBitmap = bmp_read(openFileDialog1);
-                childForm.pBitmap = NpBitmap;
-                childForm.Show();
+                openFileDialog.CheckFileExists = true; // 檢查檔案是否存在
+                openFileDialog.CheckPathExists = true; // 檢查路徑是否存在
+                openFileDialog.ValidateNames = true; // 驗證檔案名稱是否有效
+                openFileDialog.Title = "Open File - DIP Sample";
+                openFileDialog.Filter = "Image Files|*.bmp;*.png;*.jpg;*.jpeg";
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        MSForm childForm = new MSForm();
+                        childForm.MdiParent = this;
+                        childForm.pf1 = toolStripStatusLabel1;
+                        NpBitmap = new Bitmap(openFileDialog.FileName);
+                        childForm.pBitmap = NpBitmap;
+                        childForm.Show();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"開啟檔案失敗: {ex.Message}", "錯誤",
+                                      MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
         }
 
         private void 儲存ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (MdiChildren.Length == 0)
+            if (ActiveMdiChild == null)
             {
-                MessageBox.Show("沒有開啟的圖片");
+                MessageBox.Show("沒有開啟的圖片", "提示",
+                              MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            foreach (Form cF in MdiChildren)
+            if (ActiveMdiChild is MSForm msForm)
             {
-                if (cF == ActiveMdiChild) // 使用 ActiveMdiChild 確保處理當前聚焦的視窗
+                try
                 {
-                    // 確認視窗類型為 MSForm
-                    if (cF is MSForm msForm)
+                    using (SaveFileDialog saveFileDialog = new SaveFileDialog())
                     {
-                        // 開啟儲存對話框
-                        SaveFileDialog saveFileDialog = new SaveFileDialog();
-                        saveFileDialog.Filter = "PNG Files (*.png)|*.png|JPEG Files (*.jpg)|*.jpg|Bitmap Files (*.bmp)|*.bmp";
-                        saveFileDialog.Title = "儲存圖片";
-
-                        // 設定預設檔名
-                        saveFileDialog.FileName = "image.png";  // 預設檔名為 "image.png"
+                        saveFileDialog.Filter = "Bitmap Files (*.bmp)|*.bmp|" +
+                                               "PNG Files (*.png)|*.png|" +
+                                               "JPEG Files (*.jpg)|*.jpg";
+                        saveFileDialog.Title = "Save File - DIP Sample";
+                        saveFileDialog.FileName = "image.bmp";
+                        saveFileDialog.AddExtension = true; // 自動添加副檔名
 
                         if (saveFileDialog.ShowDialog() == DialogResult.OK)
                         {
-                            // 根據選擇的檔案格式儲存圖片
                             string filePath = saveFileDialog.FileName;
+                            System.Drawing.Imaging.ImageFormat format;
 
-                            // 儲存圖片
-                            msForm.pBitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
+                            switch (Path.GetExtension(filePath).ToLower())
+                            {
+                                case ".bmp":
+                                    format = System.Drawing.Imaging.ImageFormat.Bmp;
+                                    break;
+                                case ".png":
+                                    format = System.Drawing.Imaging.ImageFormat.Png;
+                                    break;
+                                case ".jpg":
+                                case ".jpeg":
+                                    format = System.Drawing.Imaging.ImageFormat.Jpeg;
+                                    break;
+                                default:
+                                    format = System.Drawing.Imaging.ImageFormat.Bmp;
+                                    break;
+                            }
+
+                            msForm.pBitmap.Save(filePath, format);
                         }
                     }
-                    else
-                    {
-                        MessageBox.Show("請先完成編輯");
-                        return;
-                    }
-                    
-                    break; // 找到聚焦的視窗後跳出迴圈
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"儲存圖片失敗: {ex.Message}", "錯誤",
+                                  MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("請先完成編輯", "提示",
+                              MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
