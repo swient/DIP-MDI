@@ -111,11 +111,19 @@ namespace DIP
 
         private void button2_Click(object sender, EventArgs e)
         {
-            MSForm msForm = new MSForm();
-            msForm.MdiParent = this.MdiParent;
-            msForm.pf1 = this.pf1;
-            msForm.pBitmap = pBitmap;
-            msForm.Show();
+            MSForm msForm = this.MdiParent.MdiChildren.OfType<MSForm>().FirstOrDefault();
+            if (msForm == null)
+            {
+                msForm = new MSForm();
+                msForm.MdiParent = this.MdiParent;
+                msForm.pf1 = this.pf1;
+                msForm.pBitmap = new Bitmap(pBitmap);
+                msForm.AddImageTab("Filter", new Bitmap(pBitmap));
+                msForm.Show();
+            }
+
+            msForm.SetCurrentTabImage(pBitmap);
+
             this.Close();
         }
     }

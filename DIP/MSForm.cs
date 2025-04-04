@@ -14,58 +14,148 @@ namespace DIP
     {
         internal Bitmap pBitmap;
         internal ToolStripStatusLabel pf1;
-        public bool isHistogram = false;
         int w, h;
 
         public MSForm()
         {
             InitializeComponent();
+            SetupTabCloseMenu();
+
+            tabControl1.DrawItem += TabControl_DrawItem;
         }
 
         private void MSForm_Load(object sender, EventArgs e)
         {
-            bmp_dip(pBitmap, pictureBox1);
+            bmp_dip(pBitmap);
             pf1.Text = "(Width,Height)=(" + pBitmap.Width + "," + pBitmap.Height + ")";
             w = pBitmap.Width;
             h = pBitmap.Height;
+        }
 
-            if (isHistogram)
+        private void bmp_dip(Bitmap pBitmap)
+        {
+            this.Width = (int)(pBitmap.Width * 1.5) + (this.Width - this.ClientRectangle.Width);
+            this.Height = (int)(pBitmap.Height * 1.5) + (this.Height - this.ClientRectangle.Height);
+
+            if (this.Width < 400 || this.Height < 400)
             {
-                int x = this.MdiParent.ClientSize.Width - this.Width - 5;
-                int y = this.MdiParent.ClientSize.Height - this.Height - 50;
-                // 設定直方圖為自動調整大小
-                pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-                // 設定視窗位置為右下角
-                this.Location = new Point(x, y);
+                this.Width = 400;
+                this.Height = 400;
             }
         }
 
-        private void bmp_dip(Bitmap pBitmap, PictureBox pictureBox1)
+        public void AddImageTab(string title, Bitmap image)
         {
-            this.Width = pBitmap.Width + (this.Width - this.ClientRectangle.Width);
-            this.Height = pBitmap.Height + (this.Height - this.ClientRectangle.Height);
-            pictureBox1.Image = pBitmap;
-            pictureBox1.Width = pBitmap.Width;
-            pictureBox1.Height = pBitmap.Height;
+            // 建立一個新的 TabPage
+            TabPage tabPage = new TabPage(title);
 
-            if (pBitmap.Width < 255 || pBitmap.Height < 255)
+            // 建立 PictureBox 來顯示圖片
+            PictureBox pictureBox = new PictureBox
             {
-                this.Width = 255 + (this.Width - this.ClientRectangle.Width);
-                this.Height = 255 + (this.Height - this.ClientRectangle.Height);
-                pictureBox1.Width = 255;
-                pictureBox1.Height = 255;
-                pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
+                Dock = DockStyle.Fill,
+                SizeMode = PictureBoxSizeMode.CenterImage,
+                Image = image
+            };
+
+            // 綁定 MouseMove 事件
+            pictureBox.MouseMove += pictureBox1_MouseMove;
+            // 把 PictureBox 加入 TabPage
+            tabPage.Controls.Add(pictureBox);
+            // 把 TabPage 加入 TabControl
+            tabControl1.TabPages.Add(tabPage);
+            // 切換到最新加入的 Tab
+            tabControl1.SelectedTab = tabPage;
+        }
+
+        public Bitmap GetCurrentTabImage()
+        {
+            if (tabControl1.TabCount == 0 || tabControl1.SelectedTab == null)
+                return null;
+
+            var pictureBox = tabControl1.SelectedTab.Controls.OfType<PictureBox>().FirstOrDefault();
+            return (pictureBox?.Image != null) ? new Bitmap(pictureBox.Image) : null;
+        }
+
+        public void SetCurrentTabImage(Bitmap newImage)
+        {
+            if (tabControl1.TabCount == 0 || tabControl1.SelectedTab == null)
+                return;
+
+            var pictureBox = tabControl1.SelectedTab.Controls.OfType<PictureBox>().FirstOrDefault();
+            if (pictureBox != null)
+            {
+                if (pictureBox.Image != null)
+                    pictureBox.Image.Dispose();
+
+                pictureBox.Image = newImage;
             }
         }
 
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.X >= 0 && e.X < pBitmap.Width && e.Y >= 0 && e.Y < pBitmap.Height)
+            var pictureBox = sender as PictureBox;
+            if (pictureBox?.Image == null)
             {
-                Color pixel = pBitmap.GetPixel(e.X, e.Y);
-                pf1.Text = "(" + e.X + "," + e.Y + ")" +
-                            "=(" + pixel.R.ToString() + "," + pixel.G.ToString() + "," + pixel.B.ToString() + ")";
+                pf1.Text = "沒有可用的圖片";
+                return;
             }
+
+            // CenterImage 專用座標轉換
+            int centerX = (pictureBox.Width - pictureBox.Image.Width) / 2;
+            int centerY = (pictureBox.Height - pictureBox.Image.Height) / 2;
+            int imgX = e.X - centerX;
+            int imgY = e.Y - centerY;
+
+            // 檢查座標是否在圖片範圍內
+            if (imgX >= 0 && imgX < pictureBox.Image.Width &&
+                imgY >= 0 && imgY < pictureBox.Image.Height)
+            {
+                Color pixel = ((Bitmap)pictureBox.Image).GetPixel(imgX, imgY);
+                pf1.Text = $"(X, Y): ({imgX}, {imgY}) | RGB: ({pixel.R}, {pixel.G}, {pixel.B})";
+            }
+            else
+            {
+                pf1.Text = $"(Width,Height)=({pictureBox.Image.Width},{pictureBox.Image.Height})";
+            }
+        }
+
+        private void SetupTabCloseMenu()
+        {
+            tabControl1.ContextMenuStrip = new ContextMenuStrip();
+            tabControl1.ContextMenuStrip.Items.Add("關閉", null, (sender, e) =>
+            {
+                // 釋放資源
+                var pictureBox = tabControl1.SelectedTab.Controls
+                                     .OfType<PictureBox>()
+                                     .FirstOrDefault();
+                pictureBox?.Image?.Dispose();
+
+                // 移除分頁
+                tabControl1.TabPages.Remove(tabControl1.SelectedTab);
+            });
+        }
+
+        private void TabControl_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            var tc = (TabControl)sender;
+            bool isSelected = (tc.SelectedIndex == e.Index);
+
+            // 繪製背景（選中=藍色，未選中=系統默認）
+            using (var brush = new SolidBrush(isSelected ? Color.DodgerBlue : SystemColors.Control))
+            {
+                e.Graphics.FillRectangle(brush, e.Bounds);
+            }
+
+            // 繪製文字
+            TextRenderer.DrawText(
+                e.Graphics,
+                tc.TabPages[e.Index].Text,
+                e.Font,
+                e.Bounds,
+                isSelected ? Color.White : SystemColors.ControlText,
+                TextFormatFlags.HorizontalCenter |
+                TextFormatFlags.VerticalCenter |
+                TextFormatFlags.NoPrefix);
         }
     }
 }

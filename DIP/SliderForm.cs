@@ -89,11 +89,11 @@ namespace DIP
 
             if (Select == 3) // 自訂旋轉角度
             {
-                this.Width = (int)(NpBitmap.Width * 1.414) + (this.Width - this.ClientRectangle.Width) * 30;
-                this.Height = (int)(NpBitmap.Height * 1.414) + (this.Height - this.ClientRectangle.Height) + 100;
+                this.Width = (int)(Math.Max(NpBitmap.Width, NpBitmap.Height) * 1.414) + (this.Width - this.ClientRectangle.Width) * 30;
+                this.Height = (int)(Math.Max(NpBitmap.Width, NpBitmap.Height) * 1.414) + (this.Height - this.ClientRectangle.Height) + 100;
                 pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
-                pictureBox1.Width = (int)(NpBitmap.Width * 1.414);
-                pictureBox1.Height = (int)(NpBitmap.Height * 1.414);
+                pictureBox1.Width = (int)(Math.Max(NpBitmap.Width, NpBitmap.Height) * 1.414);
+                pictureBox1.Height = (int)(Math.Max(NpBitmap.Width, NpBitmap.Height) * 1.414);
             }
 
             // 調整 trackBar1 位置：將其放在圖片的右邊，視窗的底部
@@ -260,11 +260,19 @@ namespace DIP
 
         private void button1_Click(object sender, EventArgs e)
         {
-            MSForm msForm = new MSForm();
-            msForm.MdiParent = this.MdiParent;
-            msForm.pf1 = this.pf1;
-            msForm.pBitmap = pBitmap;
-            msForm.Show();
+            MSForm msForm = this.MdiParent.MdiChildren.OfType<MSForm>().FirstOrDefault();
+            if (msForm == null)
+            {
+                msForm = new MSForm();
+                msForm.MdiParent = this.MdiParent;
+                msForm.pf1 = this.pf1;
+                msForm.pBitmap = new Bitmap(pBitmap);
+                msForm.AddImageTab("Slider", new Bitmap(pBitmap));
+                msForm.Show();
+            }
+
+            msForm.SetCurrentTabImage(pBitmap);
+
             this.Close();
         }
     }
