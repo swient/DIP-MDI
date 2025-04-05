@@ -270,8 +270,11 @@ namespace DIP
                 msForm.AddImageTab("Slider", new Bitmap(pBitmap));
                 msForm.Show();
             }
-
-            msForm.SetCurrentTabImage(pBitmap);
+            else
+            {
+                msForm.SetCurrentTabImage(pBitmap);
+                msForm.UpdateHistogram(pBitmap);
+            }
 
             this.Close();
         }

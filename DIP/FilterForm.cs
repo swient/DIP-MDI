@@ -121,8 +121,11 @@ namespace DIP
                 msForm.AddImageTab("Filter", new Bitmap(pBitmap));
                 msForm.Show();
             }
-
-            msForm.SetCurrentTabImage(pBitmap);
+            else
+            {
+                msForm.SetCurrentTabImage(pBitmap);
+                msForm.UpdateHistogram(pBitmap);
+            }
 
             this.Close();
         }

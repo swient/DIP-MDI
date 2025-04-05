@@ -63,6 +63,7 @@ namespace DIP
                         }
 
                         childForm.AddImageTab(fileName, new Bitmap(NpBitmap));
+                        childForm.UpdateHistogram(NpBitmap);
                     }
                     catch (Exception ex)
                     {
@@ -162,6 +163,7 @@ namespace DIP
                 // 將處理後的陣列轉換回 Bitmap
                 NpBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
                 msForm.SetCurrentTabImage(NpBitmap);
+                msForm.UpdateHistogram(NpBitmap);
             }
             else
             {
@@ -276,6 +278,7 @@ namespace DIP
                 // 將處理後的陣列轉換回 Bitmap
                 NpBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
                 msForm.SetCurrentTabImage(NpBitmap);
+                msForm.UpdateHistogram(NpBitmap);
             }
             else
             {
@@ -294,110 +297,48 @@ namespace DIP
 
             if (ActiveMdiChild is MSForm msForm)
             {
-                // ===== 直方圖計算部分 =====
                 NpBitmap = msForm.GetCurrentTabImage();
-                int[] histogram = new int[256]; // 初始化256階灰度直方圖陣列
 
-                // 鎖定Bitmap數據以提高存取效率
-                var data = NpBitmap.LockBits(
-                    new Rectangle(0, 0, NpBitmap.Width, NpBitmap.Height),
-                    ImageLockMode.ReadOnly,
-                    PixelFormat.Format32bppArgb);
-
-                // 不安全代碼區塊直接操作指針
-                unsafe
-                {
-                    byte* ptr = (byte*)data.Scan0; // 取得像素數據起始指針
-                    for (int y = 0; y < data.Height; y++)
-                    {
-                        for (int x = 0; x < data.Width; x++)
-                        {
-                            // 計算灰度值 (使用標準加權公式)
-                            int gray = (int)(0.299 * ptr[2] + 0.587 * ptr[1] + 0.114 * ptr[0]);
-                            histogram[gray]++; // 累計對應灰度值的計數
-                            ptr += 4; // 移動到下一個像素 (ARGB格式每個像素4字節)
-                        }
-                        ptr += data.Stride - data.Width * 4; // 換行處理
-                    }
-                }
-                NpBitmap.UnlockBits(data); // 解鎖Bitmap
-
-                // ===== OxyPlot 繪圖部分 =====
-                var plotModel = new PlotModel { }; // 創建空的繪圖模型
-
-                // 創建直方圖系列 (柱狀圖)
-                var series = new HistogramSeries()
-                {
-                    FillColor = OxyColors.SteelBlue, // 柱子填充色
-                    StrokeColor = OxyColors.Black,    // 邊框顏色
-                    StrokeThickness = 1               // 邊框粗細
-                };
-
-                // 填充直方圖數據
-                for (int i = 0; i < histogram.Length; i++)
-                {
-                    // 每個柱子代表1個灰度級 (i到i+1的範圍)
-                    series.Items.Add(new HistogramItem(i, i + 1, histogram[i], 0));
-                }
-
-                // 設置X軸 (底部軸)
-                plotModel.Axes.Add(new LinearAxis
-                {
-                    Position = AxisPosition.Bottom,
-                    Minimum = -1,     // 顯示範圍起點
-                    Maximum = 257,    // 顯示範圍終點 (比255多2以便完整顯示)
-                    MajorStep = 51    // 主刻度間隔 (255/5=51)
-                });
-
-                // 設置Y軸 (左側軸)
-                plotModel.Axes.Add(new LinearAxis
-                {
-                    Position = AxisPosition.Left,
-                    Minimum = 0 // Y軸從0開始
-                });
-
-                plotModel.Series.Add(series); // 將系列加入模型
-
-                // ===== 視窗設定部分 =====
-                Form plotForm = new Form();
-                plotForm.Text = "直方圖";
-                plotForm.MdiParent = this; // 設置為MDI子視窗
-
-                // 設定視窗大小
-                plotForm.Size = new Size(650, 350); // 寬650,高350
-
-                // 設定視窗起始位置在父視窗右下角
-                plotForm.StartPosition = FormStartPosition.Manual;
-                plotForm.Location = new Point(
-                    this.ClientRectangle.Right - plotForm.Width - (this.Width - this.ClientRectangle.Width),
-                    this.ClientRectangle.Bottom - plotForm.Height - (this.Height - this.ClientRectangle.Height) - 20
-                );
-
-                // 固定視窗大小
-                plotForm.FormBorderStyle = FormBorderStyle.FixedSingle;
-                plotForm.MaximizeBox = false; // 禁用最大化按鈕
-
-                // 配置提示功能格式
-                series.TrackerFormatString = "灰階值: {5}\n數量: {7}";
+                int[] histogram = ImageProcessUtils.CalculateHistogram(NpBitmap);
+                PlotModel plotModel = ImageProcessUtils.CreateHistogramPlotModel(histogram);
 
                 // 創建繪圖視圖
-                PlotView plotView = new PlotView();
-                plotView.Dock = DockStyle.Fill; // 填滿整個表單
-                plotView.Model = plotModel;     // 綁定數據模型
+                var plotView = new PlotView
+                {
+                    Model = plotModel, // 綁定數據模型
+                    Dock = DockStyle.Fill // 填滿整個表單
+                };
 
-                // ===== 交互控制部分 =====
+                // 交互控制部分
                 var disabledController = new PlotController();
-                disabledController.UnbindAll();  // 解除所有默認交互綁定
-
-                // 只保留懸停提示功能
-                disabledController.BindMouseEnter(PlotCommands.HoverPointsOnlyTrack);
+                disabledController.UnbindAll();
+                disabledController.BindMouseEnter(PlotCommands.HoverPointsOnlyTrack); // 保留滑鼠懸停提示功能
 
                 plotView.Controller = disabledController;
                 plotView.ContextMenu = null; // 禁用右鍵菜單
 
+                // 視窗設定部分
+                Form plotForm = new Form
+                {
+                    Text = "直方圖",
+                    Size = new Size(650, 350),
+                    StartPosition = FormStartPosition.Manual,
+                    Location = new Point(
+                        this.ClientRectangle.Right - 650 - (this.Width - this.ClientRectangle.Width),
+                        this.ClientRectangle.Bottom - 350 - (this.Height - this.ClientRectangle.Height) - 20
+                    ),
+                    FormBorderStyle = FormBorderStyle.FixedSingle, // 固定視窗大小
+                    MaximizeBox = false, // 禁用最大化按鈕
+                    MdiParent = this // 設置為MDI子視窗
+                };
+
                 // 將繪圖視圖加入表單
                 plotForm.Controls.Add(plotView);
                 plotForm.Show();
+
+                // 將表單引用傳遞給子表單
+                msForm.plotView = plotView;
+                msForm.plotForm = plotForm;
             }
             else
             {
@@ -459,6 +400,7 @@ namespace DIP
                 // 將處理後的陣列轉換回 Bitmap
                 NpBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
                 msForm.SetCurrentTabImage(NpBitmap);
+                msForm.UpdateHistogram(NpBitmap);
             }
             else
             {
@@ -524,6 +466,7 @@ namespace DIP
                 // 將處理後的陣列轉換回 Bitmap
                 NpBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
                 msForm.SetCurrentTabImage(NpBitmap);
+                msForm.UpdateHistogram(NpBitmap);
             }
             else
             {
@@ -564,6 +507,7 @@ namespace DIP
                 // 將處理後的陣列轉換回 Bitmap
                 NpBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
                 msForm.SetCurrentTabImage(NpBitmap);
+                msForm.UpdateHistogram(NpBitmap);
             }
             else
             {
@@ -604,6 +548,7 @@ namespace DIP
                 // 將處理後的陣列轉換回 Bitmap
                 NpBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
                 msForm.SetCurrentTabImage(NpBitmap);
+                msForm.UpdateHistogram(NpBitmap);
             }
             else
             {
@@ -666,6 +611,7 @@ namespace DIP
                 }
 
                 msForm.SetCurrentTabImage(NpBitmap);
+                msForm.UpdateHistogram(NpBitmap);
             }
             else
             {
@@ -702,6 +648,7 @@ namespace DIP
                 }
 
                 msForm.SetCurrentTabImage(NpBitmap);
+                msForm.UpdateHistogram(NpBitmap);
             }
             else
             {
@@ -752,6 +699,7 @@ namespace DIP
                     // 將處理後的陣列轉換回 Bitmap
                     NpBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
                     msForm.SetCurrentTabImage(NpBitmap);
+                    msForm.UpdateHistogram(NpBitmap);
                 }
                 else
                 {
@@ -810,6 +758,7 @@ namespace DIP
                     // 將處理後的陣列轉換回 Bitmap
                     NpBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
                     msForm.SetCurrentTabImage(NpBitmap);
+                    msForm.UpdateHistogram(NpBitmap);
                 }
                 else
                 {

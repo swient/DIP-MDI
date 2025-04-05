@@ -2,6 +2,10 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using OxyPlot;
+using OxyPlot.Series;
+using OxyPlot.Axes;
+using OxyPlot.WindowsForms;
 
 namespace DIP
 {
@@ -37,6 +41,72 @@ namespace DIP
 
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern unsafe void customfilter(int* f0, int w, int h, int d, int[] c, int* g0);
+
+        // 計算圖片的直方圖
+        public static int[] CalculateHistogram(Bitmap bitmap)
+        {
+            int[] histogram = new int[256];
+
+            var data = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadOnly,
+                PixelFormat.Format32bppArgb);
+
+            unsafe
+            {
+                byte* ptr = (byte*)data.Scan0;
+                for (int y = 0; y < data.Height; y++)
+                {
+                    for (int x = 0; x < data.Width; x++)
+                    {
+                        int gray = (int)(0.299 * ptr[2] + 0.587 * ptr[1] + 0.114 * ptr[0]);
+                        histogram[gray]++;
+                        ptr += 4;
+                    }
+                    ptr += data.Stride - data.Width * 4;
+                }
+            }
+            bitmap.UnlockBits(data);
+
+            return histogram;
+        }
+
+        // 建立 OxyPlot 直方圖模型
+        public static PlotModel CreateHistogramPlotModel(int[] histogram)
+        {
+            var plotModel = new PlotModel();
+
+            var series = new HistogramSeries()
+            {
+                FillColor = OxyColors.SteelBlue,
+                StrokeColor = OxyColors.Black,
+                StrokeThickness = 1,
+                TrackerFormatString = "灰階值: {5}\n數量: {7}"
+            };
+
+            for (int i = 0; i < histogram.Length; i++)
+            {
+                series.Items.Add(new HistogramItem(i, i + 1, histogram[i], 0));
+            }
+
+            plotModel.Axes.Add(new LinearAxis
+            {
+                Position = AxisPosition.Bottom,
+                Minimum = -1,
+                Maximum = 257,
+                MajorStep = 51
+            });
+
+            plotModel.Axes.Add(new LinearAxis
+            {
+                Position = AxisPosition.Left,
+                Minimum = 0
+            });
+
+            plotModel.Series.Add(series);
+
+            return plotModel;
+        }
 
         // 將 Bitmap 圖像轉換為整數陣列
         public static unsafe int[] BitmapToArray(Bitmap myBitmap)

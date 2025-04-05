@@ -7,11 +7,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using OxyPlot;
+using OxyPlot.WindowsForms;
 
 namespace DIP
 {
     public partial class MSForm : Form
     {
+        private readonly object _updateLock = new object();
+        internal PlotView plotView = null;
+        internal Form plotForm = null;
         internal Bitmap pBitmap;
         internal ToolStripStatusLabel pf1;
         int w, h;
@@ -119,6 +124,52 @@ namespace DIP
             }
         }
 
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            pBitmap = GetCurrentTabImage();
+            UpdateHistogram(pBitmap);
+        }
+
+        public void UpdateHistogram(Bitmap pBitmap)
+        {
+            if (plotView == null || plotForm.IsDisposed || pBitmap == null)
+                return;
+
+            lock (_updateLock)
+            {
+                var originalController = plotView.Controller;
+
+                try
+                {
+                    // 禁用所有交互
+                    plotView.Controller = new PlotController();
+
+                    // 同步計算數據
+                    int[] histogram;
+                    using (var bitmapCopy = new Bitmap(pBitmap)) // 使用副本避免GDI+锁
+                    {
+                        histogram = ImageProcessUtils.CalculateHistogram(bitmapCopy);
+                    }
+
+                    // 創建模型並更新
+                    var plotModel = ImageProcessUtils.CreateHistogramPlotModel(histogram);
+                    plotView.Model = plotModel;
+                    plotView.InvalidatePlot(true);
+                }
+                finally
+                {
+                    // 延遲綁定交互
+                    Task.Delay(150).ContinueWith(_ =>
+                    {
+                        if (!plotForm.IsDisposed && plotView != null)
+                        {
+                            plotView.Controller = originalController;
+                        }
+                    }, TaskScheduler.FromCurrentSynchronizationContext());
+                }
+            }
+        }
+
         private void SetupTabCloseMenu()
         {
             tabControl1.ContextMenuStrip = new ContextMenuStrip();
@@ -156,6 +207,11 @@ namespace DIP
                 TextFormatFlags.HorizontalCenter |
                 TextFormatFlags.VerticalCenter |
                 TextFormatFlags.NoPrefix);
+        }
+
+        private void MSForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            plotForm.Close();
         }
     }
 }
