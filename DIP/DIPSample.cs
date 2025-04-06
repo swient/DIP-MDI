@@ -135,6 +135,33 @@ namespace DIP
             }
         }
 
+        private void 灰階轉換toolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MdiChildren.Length == 0)
+            {
+                MessageBox.Show("沒有開啟的圖片");
+                return;
+            }
+
+            if (ActiveMdiChild is MSForm msForm)
+            {
+                NpBitmap = msForm.GetCurrentTabImage();
+
+                // 將 Bitmap 轉換為陣列
+                int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
+
+                // 將處理後的陣列轉換回 Bitmap
+                NpBitmap = ImageProcessUtils.ArrayToBitmap(f, NpBitmap.Width, NpBitmap.Height);
+                msForm.SetCurrentTabImage(NpBitmap);
+                msForm.UpdateHistogram(NpBitmap);
+            }
+            else
+            {
+                MessageBox.Show("請先完成編輯");
+                return;
+            }
+        }
+
         private void 負片轉換ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (MdiChildren.Length == 0)

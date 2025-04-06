@@ -65,7 +65,7 @@ namespace DIP
                     {
                         for (int x = 0; x < data.Width; x++)
                         {
-                            int gray = (int)(0.299 * ptr[2] + 0.587 * ptr[1] + 0.114 * ptr[0]);
+                            int gray = (int)Math.Round(0.299 * ptr[2] + 0.587 * ptr[1] + 0.114 * ptr[0]);
                             histogram[gray]++;
                             ptr += 4;
                         }
@@ -140,15 +140,11 @@ namespace DIP
             try
             {
                 byteArray = myBitmap.LockBits(new Rectangle(0, 0, myBitmap.Width, myBitmap.Height),
-                                                    ImageLockMode.ReadWrite,
+                                                    ImageLockMode.ReadOnly,
                                                     myBitmap.PixelFormat);
-                int ByteOfSkip = byteArray.Stride - byteArray.Width * (int)(byteArray.Stride / myBitmap.Width);
-
                 // 判斷圖像格式
-                bool isGrayscale = (myBitmap.PixelFormat == PixelFormat.Format8bppIndexed);
-                bool is32bpp = (myBitmap.PixelFormat == PixelFormat.Format32bppArgb ||
-                                myBitmap.PixelFormat == PixelFormat.Format32bppRgb);
-
+                bool is8bpp = (myBitmap.PixelFormat == PixelFormat.Format8bppIndexed);
+                int pixelSize = Image.GetPixelFormatSize(myBitmap.PixelFormat) / 8;
                 unsafe
                 {
                     byte* imgPtr = (byte*)(byteArray.Scan0);
@@ -159,26 +155,22 @@ namespace DIP
                         {
                             int index = x + byteArray.Width * y;
 
-                            if (isGrayscale)
+                            if (is8bpp)
                             {
                                 ImgData[index] = (int)*(imgPtr);
-                                imgPtr++; // 每個灰階像素佔用 1 byte
                             }
                             else
                             {
                                 byte blue = imgPtr[0];
                                 byte green = imgPtr[1];
                                 byte red = imgPtr[2];
-                                byte alpha = is32bpp ? imgPtr[3] : (byte)0; // 32bpp圖像有alpha通道
 
                                 // 計算灰階值
-                                int grayValue = (int)(0.3 * red + 0.59 * green + 0.11 * blue);
+                                int grayValue = (int)Math.Round(0.299 * red + 0.587 * green + 0.114 * blue);
                                 ImgData[index] = grayValue;
-
-                                imgPtr += is32bpp ? 4 : 3;
                             }
+                            imgPtr += pixelSize;
                         }
-                        imgPtr += ByteOfSkip;
                     }
                 }
             }
@@ -207,15 +199,23 @@ namespace DIP
             if (ImgData.Length < Width * Height)
                 throw new ArgumentException("圖像數據長度不足");
                 
-            Bitmap myBitmap = new Bitmap(Width, Height, PixelFormat.Format24bppRgb);
+            Bitmap myBitmap = new Bitmap(Width, Height, PixelFormat.Format8bppIndexed);
+
+            // 設定灰階調色板
+            ColorPalette palette = myBitmap.Palette;
+            for (int i = 0; i < 256; i++)
+            {
+                palette.Entries[i] = Color.FromArgb(i, i, i);
+            }
+            myBitmap.Palette = palette;
+
             BitmapData byteArray = null;
 
             try
             {
                 byteArray = myBitmap.LockBits(new Rectangle(0, 0, Width, Height),
                                            ImageLockMode.WriteOnly,
-                                           PixelFormat.Format24bppRgb);
-                int ByteOfSkip = byteArray.Stride - Width * 3;
+                                           PixelFormat.Format8bppIndexed);
 
                 unsafe
                 {
@@ -230,14 +230,11 @@ namespace DIP
                             int value = ImgData[index];
                             byte grayValue = (byte)Math.Max(0, Math.Min(255, value));
 
-                            // 設定 R, G, B 為相同的灰階值
-                            *imgPtr = grayValue;       // B
-                            *(imgPtr + 1) = grayValue; // G
-                            *(imgPtr + 2) = grayValue; // R
+                            // 設定ARGB值
+                            imgPtr[0] = grayValue;
 
-                            imgPtr += 3;
+                            imgPtr += 1;
                         }
-                        imgPtr += ByteOfSkip;
                     }
                 }
             }

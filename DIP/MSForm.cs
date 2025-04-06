@@ -60,7 +60,6 @@ namespace DIP
                 {
                     // 切換到現有的 Tab 並返回
                     tabControl1.SelectedTab = tab;
-                    MessageBox.Show("已存在相同標題的分頁，請選擇其他標題。", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
             }
