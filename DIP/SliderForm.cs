@@ -33,7 +33,8 @@ namespace DIP
         private void SliderForm_Load(object sender, EventArgs e)
         {
             bmp_dip(NpBitmap, pictureBox1);
-            pBitmap = NpBitmap;
+            // 創建 pBitmap 的副本，避免共用引用
+            pBitmap = new Bitmap(NpBitmap);
 
             switch (Select)
             {
@@ -266,14 +267,17 @@ namespace DIP
                 msForm = new MSForm();
                 msForm.MdiParent = this.MdiParent;
                 msForm.pf1 = this.pf1;
+                
+                // 創建新 Bitmap 副本並傳遞給 MSForm
                 msForm.pBitmap = new Bitmap(pBitmap);
                 msForm.AddImageTab("Slider", new Bitmap(pBitmap));
                 msForm.Show();
             }
             else
             {
-                msForm.SetCurrentTabImage(pBitmap);
-                msForm.UpdateHistogram(pBitmap);
+                // 創建新 Bitmap 副本並傳遞給 MSForm
+                msForm.SetCurrentTabImage(new Bitmap(pBitmap));
+                msForm.UpdateHistogram(new Bitmap(pBitmap));
             }
 
             this.Close();

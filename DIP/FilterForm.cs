@@ -30,19 +30,24 @@ namespace DIP
         private void FilterForm_Load(object sender, EventArgs e)
         {
             bmp_dip(NpBitmap, pictureBox1);
-            pBitmap = NpBitmap;
+            // 創建 pBitmap 的副本，避免共用引用
+            pBitmap = new Bitmap(NpBitmap);
+            // 設置初始圖像
+            pictureBox1.Image = NpBitmap;
+            pictureBox2.Image = pBitmap;
         }
 
         private void bmp_dip(Bitmap NpBitmap, PictureBox pictureBox1)
         {
             this.Width = NpBitmap.Width * 2 + (this.Width - this.ClientRectangle.Width) + 250 + 180;
             this.Height = NpBitmap.Height + (this.Height - this.ClientRectangle.Height) + 100;
-            pictureBox1.Image = NpBitmap;
-            pictureBox2.Image = NpBitmap;
+            
+            // 調整 pictureBox 的大小而不設置圖像
             pictureBox1.Width = NpBitmap.Width;
             pictureBox1.Height = NpBitmap.Height;
             pictureBox2.Width = NpBitmap.Width;
             pictureBox2.Height = NpBitmap.Height;
+            
             // 調整 pictureBox2 的位置：將其放在視窗的右上角
             pictureBox2.Location = new Point(pictureBox1.Right + 250, 0);
             // 調整 textBox 位置：將其放在圖片的右邊，視窗的上方

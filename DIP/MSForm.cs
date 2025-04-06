@@ -148,7 +148,7 @@ namespace DIP
 
         public void UpdateHistogram(Bitmap pBitmap)
         {
-            if (plotView == null || plotForm.IsDisposed || pBitmap == null)
+            if (plotView == null || plotForm == null || plotForm.IsDisposed || pBitmap == null)
                 return;
 
             lock (_updateLock)
@@ -162,7 +162,7 @@ namespace DIP
 
                     // 同步計算數據
                     int[] histogram;
-                    using (var bitmapCopy = new Bitmap(pBitmap)) // 使用副本避免GDI+锁
+                    using (var bitmapCopy = new Bitmap(pBitmap)) // 使用副本避免GDI+鎖
                     {
                         histogram = ImageProcessUtils.CalculateHistogram(bitmapCopy);
                     }
@@ -177,7 +177,7 @@ namespace DIP
                     // 延遲綁定交互
                     Task.Delay(150).ContinueWith(_ =>
                     {
-                        if (!plotForm.IsDisposed && plotView != null)
+                        if (plotForm != null && !plotForm.IsDisposed && plotView != null)
                         {
                             plotView.Controller = originalController;
                         }
@@ -304,7 +304,7 @@ namespace DIP
 
         private void MSForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (plotForm != null)
+            if (plotForm != null && !plotForm.IsDisposed)
             {
                 plotView.Dispose();
                 plotForm.Dispose();

@@ -299,47 +299,55 @@ namespace DIP
             {
                 NpBitmap = msForm.GetCurrentTabImage();
 
-                int[] histogram = ImageProcessUtils.CalculateHistogram(NpBitmap);
-                PlotModel plotModel = ImageProcessUtils.CreateHistogramPlotModel(histogram);
-
-                // 創建繪圖視圖
-                var plotView = new PlotView
+                try
                 {
-                    Model = plotModel, // 綁定數據模型
-                    Dock = DockStyle.Fill // 填滿整個表單
-                };
+                    int[] histogram = ImageProcessUtils.CalculateHistogram(NpBitmap);
+                    PlotModel plotModel = ImageProcessUtils.CreateHistogramPlotModel(histogram);
 
-                // 交互控制部分
-                var disabledController = new PlotController();
-                disabledController.UnbindAll();
-                disabledController.BindMouseEnter(PlotCommands.HoverPointsOnlyTrack); // 保留滑鼠懸停提示功能
+                    // 創建繪圖視圖
+                    var plotView = new PlotView
+                    {
+                        Model = plotModel, // 綁定數據模型
+                        Dock = DockStyle.Fill // 填滿整個表單
+                    };
 
-                plotView.Controller = disabledController;
-                plotView.ContextMenu = null; // 禁用右鍵菜單
+                    // 交互控制部分
+                    var disabledController = new PlotController();
+                    disabledController.UnbindAll();
+                    disabledController.BindMouseEnter(PlotCommands.HoverPointsOnlyTrack); // 保留滑鼠懸停提示功能
 
-                // 視窗設定部分
-                Form plotForm = new Form
+                    plotView.Controller = disabledController;
+                    plotView.ContextMenu = null; // 禁用右鍵菜單
+
+                    // 視窗設定部分
+                    Form plotForm = new Form
+                    {
+                        Text = "直方圖",
+                        Size = new Size(650, 350),
+                        StartPosition = FormStartPosition.Manual,
+                        Location = new Point(
+                            this.ClientRectangle.Right - 650 - (this.Width - this.ClientRectangle.Width),
+                            this.ClientRectangle.Bottom - 350 - (this.Height - this.ClientRectangle.Height) - 20
+                        ),
+                        FormBorderStyle = FormBorderStyle.FixedSingle, // 固定視窗大小
+                        MaximizeBox = false, // 禁用最大化按鈕
+                        MdiParent = this // 設置為MDI子視窗
+                    };
+
+                    // 將繪圖視圖加入表單
+                    plotForm.Controls.Add(plotView);
+                    plotForm.Show();
+
+                    // 將表單引用傳遞給子表單，並將焦點交還 MSForm
+                    msForm.plotView = plotView;
+                    msForm.plotForm = plotForm;
+                    msForm.Focus();
+                }
+                catch (Exception ex)
                 {
-                    Text = "直方圖",
-                    Size = new Size(650, 350),
-                    StartPosition = FormStartPosition.Manual,
-                    Location = new Point(
-                        this.ClientRectangle.Right - 650 - (this.Width - this.ClientRectangle.Width),
-                        this.ClientRectangle.Bottom - 350 - (this.Height - this.ClientRectangle.Height) - 20
-                    ),
-                    FormBorderStyle = FormBorderStyle.FixedSingle, // 固定視窗大小
-                    MaximizeBox = false, // 禁用最大化按鈕
-                    MdiParent = this // 設置為MDI子視窗
-                };
-
-                // 將繪圖視圖加入表單
-                plotForm.Controls.Add(plotView);
-                plotForm.Show();
-
-                // 將表單引用傳遞給子表單，並將焦點交還 MSForm
-                msForm.plotView = plotView;
-                msForm.plotForm = plotForm;
-                msForm.Focus();
+                    MessageBox.Show($"生成直方圖時發生錯誤: {ex.Message}", "錯誤", 
+                                  MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             else
             {
