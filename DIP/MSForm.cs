@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using OxyPlot;
@@ -14,6 +15,7 @@ namespace DIP
 {
     public partial class MSForm : Form
     {
+        private Dictionary<string, Bitmap> originalImages = new Dictionary<string, Bitmap>();
         private readonly object _updateLock = new object();
         internal PlotView plotView = null;
         internal Form plotForm = null;
@@ -24,7 +26,7 @@ namespace DIP
         public MSForm()
         {
             InitializeComponent();
-            SetupTabCloseMenu();
+            SetupTabContextMenu();
 
             tabControl1.DrawItem += TabControl_DrawItem;
         }
@@ -51,6 +53,18 @@ namespace DIP
 
         public void AddImageTab(string title, Bitmap image)
         {
+            // 檢查是否已存在相同標題的 Tab
+            foreach (TabPage tab in tabControl1.TabPages)
+            {
+                if (tab.Text == title)
+                {
+                    // 切換到現有的 Tab 並返回
+                    tabControl1.SelectedTab = tab;
+                    MessageBox.Show("已存在相同標題的分頁，請選擇其他標題。", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
             // 建立一個新的 TabPage
             TabPage tabPage = new TabPage(title);
 
@@ -70,6 +84,8 @@ namespace DIP
             tabControl1.TabPages.Add(tabPage);
             // 切換到最新加入的 Tab
             tabControl1.SelectedTab = tabPage;
+            // 儲存原始圖片副本
+            originalImages[title] = new Bitmap(image);
         }
 
         public Bitmap GetCurrentTabImage()
@@ -170,10 +186,26 @@ namespace DIP
             }
         }
 
-        private void SetupTabCloseMenu()
+        private void SetupTabContextMenu()
         {
             tabControl1.ContextMenuStrip = new ContextMenuStrip();
-            tabControl1.ContextMenuStrip.Items.Add("關閉", null, (sender, e) =>
+
+            tabControl1.ContextMenuStrip.Items.Add("還原圖片", null, (sender, e) =>
+            {
+                RestoreOriginalImage(tabControl1.SelectedTab.Text);
+            });
+
+            tabControl1.ContextMenuStrip.Items.Add("複製分頁", null, (sender, e) =>
+            {
+                pBitmap = GetCurrentTabImage();
+
+                string originalTitle = tabControl1.SelectedTab.Text;
+                string newTitle = GenerateCopyTabTitle(originalTitle);
+
+                AddImageTab(newTitle, pBitmap);
+            });
+
+            tabControl1.ContextMenuStrip.Items.Add("關閉分頁", null, (sender, e) =>
             {
                 // 釋放資源
                 var pictureBox = tabControl1.SelectedTab.Controls
@@ -184,6 +216,67 @@ namespace DIP
                 // 移除分頁
                 tabControl1.TabPages.Remove(tabControl1.SelectedTab);
             });
+        }
+        
+        private string GenerateCopyTabTitle(string originalTitle)
+        {
+            // 取得基礎標題（移除可能的「 - 複製」後綴）
+            string baseTitle = originalTitle.Contains(" - 複製")
+                ? originalTitle.Split(new[] { " - 複製" }, StringSplitOptions.None)[0]
+                : originalTitle;
+
+            // 計算下一個可用編號
+            int nextNumber = 1; // 預設從1開始
+            bool hasUnnumberedCopy = false;
+
+            foreach (TabPage tab in tabControl1.TabPages)
+            {
+                if (tab.Text.StartsWith(baseTitle + " - 複製"))
+                {
+                    if (tab.Text == baseTitle + " - 複製")
+                    {
+                        hasUnnumberedCopy = true;
+                    }
+                    else
+                    {
+                        var match = Regex.Match(tab.Text, @" - 複製\((\d+)\)$");
+                        if (match.Success)
+                        {
+                            int currentNum = int.Parse(match.Groups[1].Value);
+                            nextNumber = Math.Max(nextNumber, currentNum + 1);
+                        }
+                    }
+                }
+            }
+
+            // 決定標題格式
+            return hasUnnumberedCopy
+                ? $"{baseTitle} - 複製({nextNumber})"
+                : (nextNumber > 1
+                    ? $"{baseTitle} - 複製({nextNumber})"
+                    : $"{baseTitle} - 複製");
+        }
+
+        public void RestoreOriginalImage(string tabTitle)
+        {
+            if (originalImages.TryGetValue(tabTitle, out Bitmap original))
+            {
+                var tabPage = tabControl1.TabPages.Cast<TabPage>()
+                                .FirstOrDefault(t => t.Text == tabTitle);
+
+                if (tabPage != null)
+                {
+                    var pictureBox = tabPage.Controls.OfType<PictureBox>().FirstOrDefault();
+                    if (pictureBox != null)
+                    {
+                        // 釋放當前圖片
+                        pictureBox.Image?.Dispose();
+                        // 還原為原始圖片
+                        pictureBox.Image = new Bitmap(original); // 再創建一個新副本
+                        UpdateHistogram(original); // 更新直方圖
+                    }
+                }
+            }
         }
 
         private void TabControl_DrawItem(object sender, DrawItemEventArgs e)
@@ -211,7 +304,12 @@ namespace DIP
 
         private void MSForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            plotForm.Close();
+            if (plotForm != null)
+            {
+                plotView.Dispose();
+                plotForm.Dispose();
+                plotForm.Close();
+            }
         }
     }
 }

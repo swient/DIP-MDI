@@ -336,9 +336,10 @@ namespace DIP
                 plotForm.Controls.Add(plotView);
                 plotForm.Show();
 
-                // 將表單引用傳遞給子表單
+                // 將表單引用傳遞給子表單，並將焦點交還 MSForm
                 msForm.plotView = plotView;
                 msForm.plotForm = plotForm;
+                msForm.Focus();
             }
             else
             {
