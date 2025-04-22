@@ -281,9 +281,11 @@ extern "C" {
                         int newX = x + i;
                         int newY = y + j;
 
-                        if (newX >= 0 && newX < w && newY >= 0 && newY < h) {
-                            sum += matrix[newY][newX] * kernel[j + 1][i + 1];
-                        }
+                        // 邊界處理
+                        int clampedX = max(0, min(newX, w - 1));
+                        int clampedY = max(0, min(newY, h - 1));
+
+                        sum += matrix[clampedY][clampedX] * kernel[j + 1][i + 1];
                     }
                 }
                 tempMatrix[y][x] = min(max(sum / d, 0), 255);
@@ -355,15 +357,36 @@ extern "C" {
         {
             for (int i = 0; i < nw; i++)
             {
-                // 修正中心對齊的計算方式
-                int x = (int)round((i + 0.5) * scale_x - 0.5);
-                int y = (int)round((j + 0.5) * scale_y - 0.5);
+                // 計算目標像素在原始影像中的浮點座標
+                double ox = (i + 0.5) * scale_x - 0.5;
+                double oy = (j + 0.5) * scale_y - 0.5;
 
-                // 限制 x 和 y 在合法範圍內
-                x = min(w - 1, max(0, x));
-                y = min(h - 1, max(0, y));
+                // 取得整數座標作為左上角參考點，並進行邊界約束
+                int x1 = max(0, min((int)floor(ox), w - 1));
+                int y1 = max(0, min((int)floor(oy), h - 1));
 
-                g[j * nw + i] = f[y * w + x];
+                // 計算右下角座標，並進行邊界約束
+                int x2 = max(0, min(x1 + 1, w - 1));
+                int y2 = max(0, min(y1 + 1, h - 1));
+
+                // 計算小數部分 (距離)，並確保在 [0.0, 1.0) 範圍內
+                double dx = max(0.0, min(ox - x1, 1.0 - 1e-9)); // 減去一個極小值確保 < 1.0
+                double dy = max(0.0, min(oy - y1, 1.0 - 1e-9)); // 減去一個極小值確保 < 1.0
+
+                // 取得四個鄰近像素的值
+                int p1 = f[y1 * w + x1]; // 左上
+                int p2 = f[y1 * w + x2]; // 右上
+                int p3 = f[y2 * w + x1]; // 左下
+                int p4 = f[y2 * w + x2]; // 右下
+
+                // 進行雙線性內插
+                double interpolated_value =
+                    p1 * (1.0 - dx) * (1.0 - dy) +
+                    p2 * dx * (1.0 - dy) +
+                    p3 * (1.0 - dx) * dy +
+                    p4 * dx * dy;
+
+                g[j * nw + i] = min(max((int)round(interpolated_value), 0), 255);
             }
         }
     }

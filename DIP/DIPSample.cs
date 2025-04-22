@@ -761,7 +761,7 @@ namespace DIP
             if (ActiveMdiChild is MSForm msForm)
             {
                 // 顯示輸入框，預設值為 2
-                string result = Interaction.InputBox("請輸入放大倍率", "放大圖像", "2");
+                string result = Interaction.InputBox("請輸入縮小倍率", "縮小圖像", "2");
                 NpBitmap = msForm.GetCurrentTabImage();
 
                 // 使用者按下取消時，result 會是空字串

@@ -235,6 +235,8 @@ namespace DIP
 
                             imgPtr += 1;
                         }
+                        // 在處理完一行後，調整指標到下一行的起始位置
+                        imgPtr += byteArray.Stride - Width * 1;
                     }
                 }
             }
@@ -259,4 +261,4 @@ namespace DIP
             return myBitmap;
         }
     }
-} 
+}

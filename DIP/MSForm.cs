@@ -85,6 +85,12 @@ namespace DIP
             tabControl1.SelectedTab = tabPage;
             // 儲存原始圖片副本
             originalImages[title] = new Bitmap(image);
+
+            // 檢查新圖片是否大於目前視窗客戶區，若是則調整視窗大小
+            if (image.Width > this.ClientRectangle.Width || image.Height > this.ClientRectangle.Height)
+            {
+                bmp_dip(image);
+            }
         }
 
         public Bitmap GetCurrentTabImage()
@@ -108,6 +114,12 @@ namespace DIP
                     pictureBox.Image.Dispose();
 
                 pictureBox.Image = newImage;
+
+                // 檢查新圖片是否大於目前視窗客戶區，若是則調整視窗大小
+                if (newImage.Width > this.ClientRectangle.Width || newImage.Height > this.ClientRectangle.Height)
+                {
+                    bmp_dip(newImage);
+                }
             }
         }
 
