@@ -176,7 +176,7 @@ namespace DIP
 
                 // 將 Bitmap 轉換為陣列
                 int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                int[] g = new int[NpBitmap.Width * NpBitmap.Height]; // 假設 w 和 h 是圖片的寬高
+                int[] g = new int[NpBitmap.Width * NpBitmap.Height];
 
                 // 使用 unsafe 區域進行指針處理
                 unsafe
@@ -291,7 +291,7 @@ namespace DIP
 
                 // 將 Bitmap 轉換為陣列
                 int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                int[] g = new int[NpBitmap.Width * NpBitmap.Height]; // 假設 w 和 h 是圖片的寬高
+                int[] g = new int[NpBitmap.Width * NpBitmap.Height];
 
                 // 使用 unsafe 區域進行指針處理
                 unsafe
@@ -299,6 +299,43 @@ namespace DIP
                     fixed (int* f0 = f) fixed (int* g0 = g)
                     {
                         ImageProcessUtils.equalization(f0, NpBitmap.Width, NpBitmap.Height, g0); // 進行均衡化的處理
+                    }
+                }
+
+                // 將處理後的陣列轉換回 Bitmap
+                NpBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
+                msForm.SetCurrentTabImage(NpBitmap);
+                msForm.UpdateHistogram(NpBitmap);
+            }
+            else
+            {
+                MessageBox.Show("請先完成編輯");
+                return;
+            }
+        }
+
+        private void 二值化toolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MdiChildren.Length == 0)
+            {
+                MessageBox.Show("沒有開啟的圖片");
+                return;
+            }
+
+            if (ActiveMdiChild is MSForm msForm)
+            {
+                NpBitmap = msForm.GetCurrentTabImage();
+
+                // 將 Bitmap 轉換為陣列
+                int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
+                int[] g = new int[NpBitmap.Width * NpBitmap.Height];
+
+                // 使用 unsafe 區域進行指針處理
+                unsafe
+                {
+                    fixed (int* f0 = f) fixed (int* g0 = g)
+                    {
+                        ImageProcessUtils.otsuthreshold(f0, NpBitmap.Width, NpBitmap.Height, g0); // 進行二值化的處理
                     }
                 }
 
@@ -422,7 +459,7 @@ namespace DIP
 
                 // 將 Bitmap 轉換為陣列
                 int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                int[] g = new int[NpBitmap.Width * NpBitmap.Height]; // 假設 w 和 h 是圖片的寬高
+                int[] g = new int[NpBitmap.Width * NpBitmap.Height];
 
                 // 使用 unsafe 區域進行指針處理
                 unsafe
@@ -488,7 +525,7 @@ namespace DIP
 
                 // 將 Bitmap 轉換為陣列
                 int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                int[] g = new int[new_weight * new_height]; // 假設 w 和 h 是圖片的寬高
+                int[] g = new int[new_weight * new_height];
 
                 // 使用 unsafe 區域進行指針處理
                 unsafe
@@ -529,7 +566,7 @@ namespace DIP
 
                 // 將 Bitmap 轉換為陣列
                 int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                int[] g = new int[new_weight * new_height]; // 假設 w 和 h 是圖片的寬高
+                int[] g = new int[new_weight * new_height];
 
                 // 使用 unsafe 區域進行指針處理
                 unsafe
@@ -570,7 +607,7 @@ namespace DIP
 
                 // 將 Bitmap 轉換為陣列
                 int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                int[] g = new int[new_weight * new_height]; // 假設 w 和 h 是圖片的寬高
+                int[] g = new int[new_weight * new_height];
 
                 // 使用 unsafe 區域進行指針處理
                 unsafe
@@ -787,7 +824,7 @@ namespace DIP
                     {
                         fixed (int* f0 = f) fixed (int* g0 = g)
                         {
-                            ImageProcessUtils.zoom(f0, NpBitmap.Width, NpBitmap.Height, scale, g0); // 進行放大的處理
+                            ImageProcessUtils.zoom(f0, NpBitmap.Width, NpBitmap.Height, scale, g0); // 進行縮小的處理
                         }
                     }
 

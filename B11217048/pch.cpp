@@ -6,6 +6,7 @@
 #include <cstring>
 #include <math.h>
 #include <cmath>
+#include <numeric>
 
 // 使用先行編譯的標頭時，需要來源檔案才能使編譯成功。
 
@@ -177,6 +178,64 @@ extern "C" {
         free(cdf);
     }
 
+    __declspec(dllexport) void otsuthreshold(int* f, int w, int h, int* g)
+    {
+        int* hist = (int*)calloc(256, sizeof(int));
+
+        if (hist == NULL) {
+            return;
+        }
+
+        // 計算原始圖像的直方圖
+        for (int i = 0; i < w * h; i++) {
+            if (f[i] >= 0 && f[i] < 256) {
+                hist[f[i]]++;
+            }
+        }
+
+        // 計算灰階總和
+        double total_intensity_sum = 0;
+        for (int i = 0; i < 256; i++) {
+            total_intensity_sum += (double)i * hist[i];
+        }
+
+        double max_variance = 0.0;
+        int optimal_threshold = 0;
+
+        long long w0 = 0; // 背景像素數
+        double sum0 = 0.0; // 背景灰階和
+
+        // 遍歷所有可能的閾值
+        for (int t = 0; t < 256; t++) {
+            w0 += hist[t]; // 累加背景像素數
+            if (w0 == 0) continue; // 如果背景像素數為0，跳過
+
+            long long w1 = w * h - w0; // 前景像素數
+            if (w1 == 0) break; // 如果前景像素數為0，後續閾值無需計算
+
+            sum0 += (double)t * hist[t]; // 累加背景灰階和
+            double sum1 = total_intensity_sum - sum0; // 前景灰階和
+
+            double mu0 = sum0 / w0; // 背景平均灰階
+            double mu1 = sum1 / w1; // 前景平均灰階
+
+            // 計算組間變異數
+            double between_class_variance = (double)w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
+
+            // 找到最大變異數對應的閾值
+            if (between_class_variance > max_variance) {
+                max_variance = between_class_variance;
+                optimal_threshold = t;
+            }
+        }
+
+        for (int i = 0; i < w * h; i++) {
+            g[i] = (f[i] >= optimal_threshold) ? 255 : 0;
+        }
+
+        free(hist);
+    }
+
     __declspec(dllexport) void averagefilter(int* f, int w, int h, int s, int* g)
     {
         int** matrix = Convert1DTo2D(f, w, h);
@@ -318,8 +377,10 @@ extern "C" {
         int** matrix = Convert1DTo2D(f, w, h);
         int** tempMatrix = Convert1DTo2D(g, nw, nh);
 
-        int cx = w / 2, cy = h / 2;
-        int cx_new = nw / 2, cy_new = nh / 2;
+        double cx = (w - 1.0) / 2.0;
+        double cy = (h - 1.0) / 2.0;
+        double cx_new = (nw - 1.0) / 2.0;
+        double cy_new = (nh - 1.0) / 2.0;
 
         for (int y = 0; y < nh; y++) {
             for (int x = 0; x < nw; x++) {

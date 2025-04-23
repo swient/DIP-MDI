@@ -20,7 +20,10 @@ namespace DIP
         
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern unsafe void equalization(int* f0, int w, int h, int* g0);
-        
+
+        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern unsafe void otsuthreshold(int* f0, int w, int h, int* g0);
+
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern unsafe void highpassfilter(int* f0, int w, int h, int* g0);
         
