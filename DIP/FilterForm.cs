@@ -71,6 +71,8 @@ namespace DIP
             button1.Location = new Point((pictureBox1.Left + pictureBox1.Right - button1.Width) / 2, this.ClientRectangle.Bottom - button1.Height - 30);
             // 調整 button2 位置：將其放在視窗底部並且水平居中
             button2.Location = new Point((pictureBox2.Left + pictureBox2.Right - button2.Width) / 2, this.ClientRectangle.Bottom - button2.Height - 30);
+            // 調整 flowLayoutPanel1 位置：將其放在視窗底部並且水平放在 button1 與 button2 之間
+            flowLayoutPanel1.Location = new Point((button1.Left + button2.Left + button2.Width - flowLayoutPanel1.Width) / 2, this.ClientRectangle.Bottom - button2.Height - 50);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -134,6 +136,58 @@ namespace DIP
             }
 
             this.Close();
+        }
+
+        private void SetKernelValues(int[] kernel, int divisor)
+        {
+            if (kernel == null || kernel.Length != 9)
+            {
+                return;
+            }
+
+            textBox1.Text = kernel[0].ToString();
+            textBox2.Text = kernel[1].ToString();
+            textBox3.Text = kernel[2].ToString();
+            textBox4.Text = kernel[3].ToString();
+            textBox5.Text = kernel[4].ToString();
+            textBox6.Text = kernel[5].ToString();
+            textBox7.Text = kernel[6].ToString();
+            textBox8.Text = kernel[7].ToString();
+            textBox9.Text = kernel[8].ToString();
+            textBox10.Text = divisor.ToString();
+        }
+
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton1.Checked)
+            {
+                // 高斯模糊
+                int[] kernel = { 1, 2, 1, 2, 4, 2, 1, 2, 1 };
+                int divisor = 16;
+                SetKernelValues(kernel, divisor);
+            }
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton2.Checked)
+            {
+                // 浮雕效果
+                int[] kernel = { -2, -1, 0, -1, 1, 1, 0, 1, 2 };
+                int divisor = 1;
+                SetKernelValues(kernel, divisor);
+            }
+        }
+
+        private void radioButton3_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton3.Checked)
+            {
+                // 銳化
+                int[] kernel = { 0, -1, 0, -1, 5, -1, 0, -1, 0 };
+                int divisor = 1;
+                SetKernelValues(kernel, divisor);
+            }
         }
     }
 }

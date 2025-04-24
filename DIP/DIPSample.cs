@@ -43,15 +43,22 @@ namespace DIP
 
         private void UpdateMenuState()
         {
-            // 檢查是否有 MSForm 型別的子視窗存在
+            // 檢查是否有子表單存在
             bool msFormExists = this.MdiChildren.OfType<MSForm>().Any();
+            bool sliderFormExists = this.MdiChildren.OfType<SliderForm>().Any();
+            bool filterFormExists = this.MdiChildren.OfType<FilterForm>().Any();
+            bool baseEnabled = msFormExists && !sliderFormExists && !filterFormExists; // 基本啟用狀態
+            // 檢查是否有直方圖表單存在
+            bool histogramFormExists = this.MdiChildren.Any(form => form.Text == "直方圖");
 
-            // 根據是否存在 MSForm 來啟用/禁用相關選單項目
-            儲存ToolStripMenuItem.Enabled = msFormExists;
-            編輯ToolStripMenuItem.Enabled = msFormExists;
-            視圖ToolStripMenuItem.Enabled = msFormExists;
-            圖像toolStripMenuItem.Enabled = msFormExists;
-            濾波器ToolStripMenuItem.Enabled = msFormExists;
+            // 根據是否存在子表單來啟用/禁用相關選單項目
+            儲存ToolStripMenuItem.Enabled = baseEnabled;
+            編輯ToolStripMenuItem.Enabled = baseEnabled;
+            視圖ToolStripMenuItem.Enabled = baseEnabled;
+            圖像toolStripMenuItem.Enabled = baseEnabled;
+            濾波器ToolStripMenuItem.Enabled = baseEnabled;
+            // 如果直方圖表單存在，則禁用直方圖選單項目
+            直方圖ToolStripMenuItem.Enabled = !histogramFormExists;
         }
 
         private void 開啟ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -233,7 +240,7 @@ namespace DIP
                 NpBitmap = msForm.GetCurrentTabImage();
 
                 SliderForm childForm = new SliderForm();
-                childForm.Select = 4;
+                childForm.Select = "LocalMosaic";
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
                 childForm.NpBitmap = NpBitmap;
@@ -260,7 +267,7 @@ namespace DIP
                 NpBitmap = msForm.GetCurrentTabImage();
 
                 SliderForm childForm = new SliderForm();
-                childForm.Select = 0;
+                childForm.Select = "Brightness";
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
                 childForm.NpBitmap = NpBitmap;
@@ -287,7 +294,7 @@ namespace DIP
                 NpBitmap = msForm.GetCurrentTabImage();
 
                 SliderForm childForm = new SliderForm();
-                childForm.Select = 1;
+                childForm.Select = "Contrast";
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
                 childForm.NpBitmap = NpBitmap;
@@ -456,7 +463,7 @@ namespace DIP
                 NpBitmap = msForm.GetCurrentTabImage();
 
                 SliderForm childForm = new SliderForm();
-                childForm.Select = 2;
+                childForm.Select = "AverageFilter";
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
                 childForm.NpBitmap = NpBitmap;
@@ -666,7 +673,7 @@ namespace DIP
                 NpBitmap = msForm.GetCurrentTabImage();
 
                 SliderForm childForm = new SliderForm();
-                childForm.Select = 3;
+                childForm.Select = "CustomRotation";
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
                 childForm.NpBitmap = NpBitmap;

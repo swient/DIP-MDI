@@ -20,7 +20,7 @@ namespace DIP
         internal Bitmap pBitmap;
         internal ToolStripStatusLabel pf1;
         internal string OriginalTabTitle;
-        public new int Select;
+        public new string Select;
         private bool isSelecting = false; // 是否正在框選
         private Point selectionStart; // 框選的起始點
         private Point selectionEnd; // 框選的結束點
@@ -39,7 +39,7 @@ namespace DIP
 
             switch (Select)
             {
-                case 0:
+                case "Brightness":
                     label1.Text = "亮度";
                     trackBar1.Minimum = -255;
                     trackBar1.Maximum = 255;
@@ -47,7 +47,7 @@ namespace DIP
                     textBox1.Text = "0";
                     break;
 
-                case 1:
+                case "Contrast":
                     label1.Text = "對比度";
                     trackBar1.Minimum = 0;
                     trackBar1.Maximum = 300;
@@ -55,7 +55,7 @@ namespace DIP
                     textBox1.Text = "1";
                     break;
 
-                case 2:
+                case "AverageFilter":
                     label1.Text = "平均濾波";
                     trackBar1.Minimum = 1;
                     trackBar1.Maximum = 10;
@@ -63,7 +63,7 @@ namespace DIP
                     textBox1.Text = "1";
                     break;
 
-                case 3:
+                case "CustomRotation":
                     label1.Text = "自訂旋轉角度";
                     trackBar1.Minimum = 0;
                     trackBar1.Maximum = 360;
@@ -71,7 +71,7 @@ namespace DIP
                     textBox1.Text = "0";
                     break;
 
-                case 4:
+                case "LocalMosaic":
                     label1.Text = "局部馬賽克";
                     trackBar1.Minimum = 1;
                     trackBar1.Maximum = 10;
@@ -89,7 +89,7 @@ namespace DIP
             pictureBox1.Width = NpBitmap.Width;
             pictureBox1.Height = NpBitmap.Height;
 
-            if (Select == 3) // 自訂旋轉角度
+            if (Select == "CustomRotation") // 自訂旋轉角度
             {
                 this.Width = (int)(Math.Max(NpBitmap.Width, NpBitmap.Height) * 1.414) + (this.Width - this.ClientRectangle.Width) * 30;
                 this.Height = (int)(Math.Max(NpBitmap.Width, NpBitmap.Height) * 1.414) + (this.Height - this.ClientRectangle.Height) + 100;
@@ -115,7 +115,7 @@ namespace DIP
 
             switch (Select)
             {
-                case 0: // 亮度
+                case "Brightness": // 亮度
                     textBox1.Text = trackBar1.Value.ToString();
 
                     f = ImageProcessUtils.BitmapToArray(NpBitmap);
@@ -131,7 +131,7 @@ namespace DIP
                     pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
                     break;
 
-                case 1: // 對比度
+                case "Contrast": // 對比度
                     double c = (double)trackBar1.Value / 100;
                     textBox1.Text = ((double)trackBar1.Value / 100).ToString();
 
@@ -148,7 +148,7 @@ namespace DIP
                     pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
                     break;
 
-                case 2: // 平均濾波
+                case "AverageFilter": // 平均濾波
                     textBox1.Text = trackBar1.Value.ToString();
 
                     f = ImageProcessUtils.BitmapToArray(NpBitmap);
@@ -164,7 +164,7 @@ namespace DIP
                     pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
                     break;
 
-                case 3: // 自訂旋轉角度
+                case "CustomRotation": // 自訂旋轉角度
                     textBox1.Text = trackBar1.Value.ToString();
 
                     double theta = (double)trackBar1.Value * Math.PI / 180;
@@ -184,7 +184,7 @@ namespace DIP
                     pBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
                     break;
 
-                case 4: // 局部馬賽克
+                case "LocalMosaic": // 局部馬賽克
                     textBox1.Text = trackBar1.Value.ToString();
 
                     int[] customlocation = new int[4];
@@ -212,7 +212,7 @@ namespace DIP
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            if (Select == 4 && e.Button == MouseButtons.Left)  // 只有在局部馬賽克時才啟用框選
+            if (Select == "LocalMosaic" && e.Button == MouseButtons.Left)  // 只有在局部馬賽克時才啟用框選
             {
                 isSelecting = true;
                 selectionStart = e.Location;  // 紀錄滑鼠按下的起始位置
@@ -250,7 +250,7 @@ namespace DIP
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
-            if (Select == 4 && selectionRect.Width > 0 && selectionRect.Height > 0)
+            if (Select == "LocalMosaic" && selectionRect.Width > 0 && selectionRect.Height > 0)
             {
                 // 绘制红色的矩形框
                 using (Pen pen = new Pen(Color.Red, 2))
