@@ -19,6 +19,7 @@ namespace DIP
         internal Bitmap NpBitmap;
         internal Bitmap pBitmap;
         internal ToolStripStatusLabel pf1;
+        internal string OriginalTabTitle;
         public new int Select;
         private bool isSelecting = false; // 是否正在框選
         private Point selectionStart; // 框選的起始點
@@ -270,7 +271,7 @@ namespace DIP
                 
                 // 創建新 Bitmap 副本並傳遞給 MSForm
                 msForm.pBitmap = new Bitmap(pBitmap);
-                msForm.AddImageTab("Slider", new Bitmap(pBitmap));
+                msForm.AddImageTab(OriginalTabTitle, new Bitmap(pBitmap)); 
                 msForm.Show();
             }
             else

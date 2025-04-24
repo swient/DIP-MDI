@@ -20,6 +20,7 @@ namespace DIP
         internal Bitmap NpBitmap;
         internal Bitmap pBitmap;
         internal ToolStripStatusLabel pf1;
+        internal string OriginalTabTitle;
         public new int Select;
 
         public FilterForm()
@@ -123,7 +124,7 @@ namespace DIP
                 msForm.MdiParent = this.MdiParent;
                 msForm.pf1 = this.pf1;
                 msForm.pBitmap = new Bitmap(pBitmap);
-                msForm.AddImageTab("Filter", new Bitmap(pBitmap));
+                msForm.AddImageTab(OriginalTabTitle, new Bitmap(pBitmap));
                 msForm.Show();
             }
             else

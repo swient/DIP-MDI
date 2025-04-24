@@ -93,6 +93,14 @@ namespace DIP
             }
         }
 
+        public string GetCurrentTabTitle()
+        {
+            if (tabControl1.TabCount == 0 || tabControl1.SelectedTab == null)
+                return "Untitled";
+
+            return tabControl1.SelectedTab.Text;
+        }
+
         public Bitmap GetCurrentTabImage()
         {
             if (tabControl1.TabCount == 0 || tabControl1.SelectedTab == null)
@@ -226,9 +234,14 @@ namespace DIP
 
                 // 移除分頁
                 tabControl1.TabPages.Remove(tabControl1.SelectedTab);
+
+                if (tabControl1.TabCount == 0)
+                {
+                    this.Close();
+                }
             });
         }
-        
+
         private string GenerateCopyTabTitle(string originalTitle)
         {
             // 取得基礎標題（移除可能的「 - 複製」後綴）

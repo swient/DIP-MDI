@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -31,6 +31,27 @@ namespace DIP
         {
             this.IsMdiContainer = true; // 設定為 MDI 容器
             this.toolStripStatusLabel1.Text = "";
+            UpdateMenuState(); // 初始化選單狀態
+        }
+
+        private void DIPSample_MdiChildActivate(object sender, EventArgs e)
+        {
+            // 延後執行，確保 MSForm 在狀態完成後更新選單狀態
+            this.BeginInvoke(new Action(() => UpdateMenuState()));
+        }
+
+
+        private void UpdateMenuState()
+        {
+            // 檢查是否有 MSForm 型別的子視窗存在
+            bool msFormExists = this.MdiChildren.OfType<MSForm>().Any();
+
+            // 根據是否存在 MSForm 來啟用/禁用相關選單項目
+            儲存ToolStripMenuItem.Enabled = msFormExists;
+            編輯ToolStripMenuItem.Enabled = msFormExists;
+            視圖ToolStripMenuItem.Enabled = msFormExists;
+            圖像toolStripMenuItem.Enabled = msFormExists;
+            濾波器ToolStripMenuItem.Enabled = msFormExists;
         }
 
         private void 開啟ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -216,6 +237,7 @@ namespace DIP
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
                 childForm.NpBitmap = NpBitmap;
+                childForm.OriginalTabTitle = msForm.GetCurrentTabTitle();
                 childForm.Show();
             }
             else
@@ -242,6 +264,7 @@ namespace DIP
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
                 childForm.NpBitmap = NpBitmap;
+                childForm.OriginalTabTitle = msForm.GetCurrentTabTitle();
                 childForm.Show();
             }
             else
@@ -268,6 +291,7 @@ namespace DIP
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
                 childForm.NpBitmap = NpBitmap;
+                childForm.OriginalTabTitle = msForm.GetCurrentTabTitle();
                 childForm.Show();
             }
             else
@@ -436,6 +460,7 @@ namespace DIP
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
                 childForm.NpBitmap = NpBitmap;
+                childForm.OriginalTabTitle = msForm.GetCurrentTabTitle();
                 childForm.Show();
             }
             else
@@ -498,6 +523,7 @@ namespace DIP
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
                 childForm.NpBitmap = NpBitmap;
+                childForm.OriginalTabTitle = msForm.GetCurrentTabTitle();
                 childForm.Show();
             }
             else
@@ -519,9 +545,8 @@ namespace DIP
             {
                 NpBitmap = msForm.GetCurrentTabImage();
 
-                double theta = 90 * Math.PI / 180;
-                int new_weight = (int)Math.Round(NpBitmap.Height * Math.Abs(Math.Sin(theta)) + NpBitmap.Width * Math.Abs(Math.Cos(theta)));
-                int new_height = (int)Math.Round(NpBitmap.Height * Math.Abs(Math.Cos(theta)) + NpBitmap.Width * Math.Abs(Math.Sin(theta)));
+                int new_weight = NpBitmap.Height;
+                int new_height = NpBitmap.Width;
 
                 // 將 Bitmap 轉換為陣列
                 int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
@@ -560,9 +585,8 @@ namespace DIP
             {
                 NpBitmap = msForm.GetCurrentTabImage();
 
-                double theta = 90 * Math.PI / 180;
-                int new_weight = (int)Math.Round(NpBitmap.Height * Math.Abs(Math.Sin(theta)) + NpBitmap.Width * Math.Abs(Math.Cos(theta)));
-                int new_height = (int)Math.Round(NpBitmap.Height * Math.Abs(Math.Cos(theta)) + NpBitmap.Width * Math.Abs(Math.Sin(theta)));
+                int new_weight = NpBitmap.Width;
+                int new_height = NpBitmap.Height;
 
                 // 將 Bitmap 轉換為陣列
                 int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
@@ -601,9 +625,8 @@ namespace DIP
             {
                 NpBitmap = msForm.GetCurrentTabImage();
 
-                double theta = 90 * Math.PI / 180;
-                int new_weight = (int)Math.Round(NpBitmap.Height * Math.Abs(Math.Sin(theta)) + NpBitmap.Width * Math.Abs(Math.Cos(theta)));
-                int new_height = (int)Math.Round(NpBitmap.Height * Math.Abs(Math.Cos(theta)) + NpBitmap.Width * Math.Abs(Math.Sin(theta)));
+                int new_weight = NpBitmap.Height;
+                int new_height = NpBitmap.Width;
 
                 // 將 Bitmap 轉換為陣列
                 int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
@@ -647,6 +670,7 @@ namespace DIP
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
                 childForm.NpBitmap = NpBitmap;
+                childForm.OriginalTabTitle = msForm.GetCurrentTabTitle();
                 childForm.Show();
             }
             else
