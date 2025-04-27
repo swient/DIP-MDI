@@ -40,39 +40,21 @@ namespace DIP
 
         private void bmp_dip(Bitmap NpBitmap, PictureBox pictureBox1)
         {
-            this.Width = NpBitmap.Width * 2 + (this.Width - this.ClientRectangle.Width) + 250 + 180;
-            this.Height = NpBitmap.Height + (this.Height - this.ClientRectangle.Height) + 100;
-            
-            // 調整 pictureBox 的大小而不設置圖像
+            if (NpBitmap.Width < 256 || NpBitmap.Height < 256)
+            {
+                this.Width = 256 * 2 + label1.Width + panel1.Width + (this.Width - this.ClientRectangle.Width) + 150;
+                this.Height = 256 + (this.Height - this.ClientRectangle.Height) + 200;
+            }
+            else
+            {
+                this.Width = NpBitmap.Width * 2 + label1.Width + panel1.Width + (this.Width - this.ClientRectangle.Width) + 150;
+                this.Height = NpBitmap.Height + (this.Height - this.ClientRectangle.Height) + 200;
+            }
+
             pictureBox1.Width = NpBitmap.Width;
             pictureBox1.Height = NpBitmap.Height;
             pictureBox2.Width = NpBitmap.Width;
             pictureBox2.Height = NpBitmap.Height;
-            
-            // 調整 pictureBox2 的位置：將其放在視窗的右上角
-            pictureBox2.Location = new Point(pictureBox1.Right + 250, 0);
-            // 調整 textBox 位置：將其放在圖片的右邊，視窗的上方
-            textBox1.Location = new Point(pictureBox1.Right + 75, 60);
-            textBox2.Location = new Point(pictureBox1.Right + 110, 60);
-            textBox3.Location = new Point(pictureBox1.Right + 145, 60);
-            textBox4.Location = new Point(pictureBox1.Right + 75, 85);
-            textBox5.Location = new Point(pictureBox1.Right + 110, 85);
-            textBox6.Location = new Point(pictureBox1.Right + 145, 85);
-            textBox7.Location = new Point(pictureBox1.Right + 75, 110);
-            textBox8.Location = new Point(pictureBox1.Right + 110, 110);
-            textBox9.Location = new Point(pictureBox1.Right + 145, 110);
-            // 調整 label1 位置：將其放在pictureBox2 和視窗右邊框的中間，視窗的右上角
-            label1.Location = new Point((pictureBox2.Right + this.ClientRectangle.Width - label1.Width) / 2, 20);
-            // 調整 label2 位置：將其放在 pictureBox1 的右邊，並且置中
-            label2.Location = new Point(pictureBox1.Right + 85, 150);
-            // 調整 textBox10 位置：將其放在 label2 的右邊，並且置中
-            textBox10.Location = new Point(pictureBox1.Right + label2.Width + 85 + 5, 150);
-            // 調整 button1 位置：將其放在視窗底部並且水平居中
-            button1.Location = new Point((pictureBox1.Left + pictureBox1.Right - button1.Width) / 2, this.ClientRectangle.Bottom - button1.Height - 30);
-            // 調整 button2 位置：將其放在視窗底部並且水平居中
-            button2.Location = new Point((pictureBox2.Left + pictureBox2.Right - button2.Width) / 2, this.ClientRectangle.Bottom - button2.Height - 30);
-            // 調整 flowLayoutPanel1 位置：將其放在視窗底部並且水平放在 button1 與 button2 之間
-            flowLayoutPanel1.Location = new Point((button1.Left + button2.Left + button2.Width - flowLayoutPanel1.Width) / 2, this.ClientRectangle.Bottom - button2.Height - 50);
         }
 
         private void button1_Click(object sender, EventArgs e)

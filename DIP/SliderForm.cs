@@ -36,6 +36,8 @@ namespace DIP
             bmp_dip(NpBitmap, pictureBox1);
             // 創建 pBitmap 的副本，避免共用引用
             pBitmap = new Bitmap(NpBitmap);
+            // 設置初始圖像
+            pictureBox1.Image = NpBitmap;
 
             switch (Select)
             {
@@ -83,29 +85,37 @@ namespace DIP
 
         private void bmp_dip(Bitmap NpBitmap, PictureBox pictureBox1)
         {
-            this.Width = NpBitmap.Width + (this.Width - this.ClientRectangle.Width) * 30;
-            this.Height = NpBitmap.Height + (this.Height - this.ClientRectangle.Height) + 100;
-            pictureBox1.Image = NpBitmap;
+            if (NpBitmap.Width < 256 || NpBitmap.Height < 256)
+            {
+                this.Width = 256 + label1.Width + trackBar1.Width + (this.Width - this.ClientRectangle.Width) + 50;
+                this.Height = 256 + (this.Height - this.ClientRectangle.Height) + 100;
+            }
+            else
+            {
+                this.Width = NpBitmap.Width + label1.Width + trackBar1.Width + (this.Width - this.ClientRectangle.Width) + 50;
+                this.Height = NpBitmap.Height + (this.Height - this.ClientRectangle.Height) + 100;
+            }
+
             pictureBox1.Width = NpBitmap.Width;
             pictureBox1.Height = NpBitmap.Height;
 
             if (Select == "CustomRotation") // 自訂旋轉角度
             {
-                this.Width = (int)(Math.Max(NpBitmap.Width, NpBitmap.Height) * 1.414) + (this.Width - this.ClientRectangle.Width) * 30;
-                this.Height = (int)(Math.Max(NpBitmap.Width, NpBitmap.Height) * 1.414) + (this.Height - this.ClientRectangle.Height) + 100;
+                if (NpBitmap.Width < 256 | NpBitmap.Height < 256)
+                {
+                    this.Width = (int)(256 * 1.414) + label1.Width + trackBar1.Width + (this.Width - this.ClientRectangle.Width) + 50;
+                    this.Height = (int)(256 * 1.414) + (this.Height - this.ClientRectangle.Height) + 100;
+                }
+                else
+                {
+                    this.Width = (int)(Math.Max(NpBitmap.Width, NpBitmap.Height) * 1.414) + label1.Width + trackBar1.Width + (this.Width - this.ClientRectangle.Width) + 50;
+                    this.Height = (int)(Math.Max(NpBitmap.Width, NpBitmap.Height) * 1.414) + (this.Height - this.ClientRectangle.Height) + 100;
+                }
+
                 pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
                 pictureBox1.Width = (int)(Math.Max(NpBitmap.Width, NpBitmap.Height) * 1.414);
                 pictureBox1.Height = (int)(Math.Max(NpBitmap.Width, NpBitmap.Height) * 1.414);
             }
-
-            // 調整 trackBar1 位置：將其放在圖片的右邊，視窗的底部
-            trackBar1.Location = new Point(pictureBox1.Right + 60, this.ClientRectangle.Bottom - trackBar1.Height - 100);
-            // 調整 textBox1 位置：將其放在 trackBar1 的上方，並且置中
-            textBox1.Location = new Point(trackBar1.Left + (trackBar1.Width - textBox1.Width) / 2, trackBar1.Top - textBox1.Height - 20);
-            // 調整 label1 位置：將其放在視窗的右上角
-            label1.Location = new Point(this.ClientRectangle.Right - label1.Width - 60, 20);
-            // 調整 button1 位置：將其放在視窗底部並且水平居中
-            button1.Location = new Point((this.ClientRectangle.Width - button1.Width) / 2, this.ClientRectangle.Bottom - button1.Height - 30);
         }
 
         private void trackBar1_Scroll(object sender, EventArgs e)
@@ -173,23 +183,29 @@ namespace DIP
 
                     Task.Run(() =>
                     {
+                        Bitmap bitmapCopy = null;
+                        int width = 0, height = 0;
                         int trackBarValue = 0;
+
                         pictureBox1.Invoke((MethodInvoker)delegate
                         {
+                            bitmapCopy = new Bitmap(NpBitmap);
+                            width = NpBitmap.Width;
+                            height = NpBitmap.Height;
                             trackBarValue = trackBar1.Value;
                         });
 
                         double theta = (double)trackBarValue * Math.PI / 180;
-                        int new_weight = (int)Math.Round(NpBitmap.Height * Math.Abs(Math.Sin(theta)) + NpBitmap.Width * Math.Abs(Math.Cos(theta)));
-                        int new_height = (int)Math.Round(NpBitmap.Height * Math.Abs(Math.Cos(theta)) + NpBitmap.Width * Math.Abs(Math.Sin(theta)));
+                        int new_weight = (int)Math.Round(height * Math.Abs(Math.Sin(theta)) + width * Math.Abs(Math.Cos(theta)));
+                        int new_height = (int)Math.Round(height * Math.Abs(Math.Cos(theta)) + width * Math.Abs(Math.Sin(theta)));
 
-                        int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
+                        int[] f = ImageProcessUtils.BitmapToArray(bitmapCopy);
                         int[] g = new int[new_weight * new_height];
                         unsafe
                         {
                             fixed (int* f0 = f) fixed (int* g0 = g)
                             {
-                                ImageProcessUtils.customrotationangle(f0, NpBitmap.Width, NpBitmap.Height, trackBarValue, g0);
+                                ImageProcessUtils.customrotationangle(f0, width, height, trackBarValue, g0);
                             }
                         }
 
@@ -200,6 +216,8 @@ namespace DIP
                             pBitmap = rotatedBitmap;
                             pictureBox1.Image = pBitmap;
                         });
+
+                        bitmapCopy.Dispose();
                     });
                     break;
                 }
