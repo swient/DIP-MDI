@@ -110,16 +110,14 @@ namespace DIP
 
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
-            int[] f;
-            int[] g;
-
             switch (Select)
             {
                 case "Brightness": // 亮度
+                {
                     textBox1.Text = trackBar1.Value.ToString();
 
-                    f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                    g = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
+                    int[] g = new int[NpBitmap.Width * NpBitmap.Height];
                     unsafe
                     {
                         fixed (int* f0 = f) fixed (int* g0 = g)
@@ -130,13 +128,15 @@ namespace DIP
 
                     pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
                     break;
+                }
 
                 case "Contrast": // 對比度
+                {
                     double c = (double)trackBar1.Value / 100;
                     textBox1.Text = ((double)trackBar1.Value / 100).ToString();
 
-                    f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                    g = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
+                    int[] g = new int[NpBitmap.Width * NpBitmap.Height];
                     unsafe
                     {
                         fixed (int* f0 = f) fixed (int* g0 = g)
@@ -147,12 +147,14 @@ namespace DIP
 
                     pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
                     break;
+                }
 
                 case "AverageFilter": // 平均濾波
+                {
                     textBox1.Text = trackBar1.Value.ToString();
 
-                    f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                    g = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
+                    int[] g = new int[NpBitmap.Width * NpBitmap.Height];
                     unsafe
                     {
                         fixed (int* f0 = f) fixed (int* g0 = g)
@@ -163,28 +165,47 @@ namespace DIP
 
                     pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
                     break;
+                }
 
                 case "CustomRotation": // 自訂旋轉角度
+                {
                     textBox1.Text = trackBar1.Value.ToString();
 
-                    double theta = (double)trackBar1.Value * Math.PI / 180;
-                    int new_weight = (int)Math.Round(NpBitmap.Height * Math.Abs(Math.Sin(theta)) + NpBitmap.Width * Math.Abs(Math.Cos(theta)));
-                    int new_height = (int)Math.Round(NpBitmap.Height * Math.Abs(Math.Cos(theta)) + NpBitmap.Width * Math.Abs(Math.Sin(theta)));
-
-                    f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                    g = new int[new_weight * new_height];
-                    unsafe
+                    Task.Run(() =>
                     {
-                        fixed (int* f0 = f) fixed (int* g0 = g)
+                        int trackBarValue = 0;
+                        pictureBox1.Invoke((MethodInvoker)delegate
                         {
-                            ImageProcessUtils.customrotationangle(f0, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, g0);
-                        }
-                    }
+                            trackBarValue = trackBar1.Value;
+                        });
 
-                    pBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
+                        double theta = (double)trackBarValue * Math.PI / 180;
+                        int new_weight = (int)Math.Round(NpBitmap.Height * Math.Abs(Math.Sin(theta)) + NpBitmap.Width * Math.Abs(Math.Cos(theta)));
+                        int new_height = (int)Math.Round(NpBitmap.Height * Math.Abs(Math.Cos(theta)) + NpBitmap.Width * Math.Abs(Math.Sin(theta)));
+
+                        int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
+                        int[] g = new int[new_weight * new_height];
+                        unsafe
+                        {
+                            fixed (int* f0 = f) fixed (int* g0 = g)
+                            {
+                                ImageProcessUtils.customrotationangle(f0, NpBitmap.Width, NpBitmap.Height, trackBarValue, g0);
+                            }
+                        }
+
+                        Bitmap rotatedBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
+
+                        pictureBox1.Invoke((MethodInvoker)delegate
+                        {
+                            pBitmap = rotatedBitmap;
+                            pictureBox1.Image = pBitmap;
+                        });
+                    });
                     break;
+                }
 
                 case "LocalMosaic": // 局部馬賽克
+                {
                     textBox1.Text = trackBar1.Value.ToString();
 
                     int[] customlocation = new int[4];
@@ -193,8 +214,8 @@ namespace DIP
                     customlocation[2] = selectionEnd.X;
                     customlocation[3] = selectionEnd.Y;
 
-                    f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                    g = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
+                    int[] g = new int[NpBitmap.Width * NpBitmap.Height];
                     unsafe
                     {
                         fixed (int* f0 = f) fixed (int* g0 = g)
@@ -205,6 +226,7 @@ namespace DIP
 
                     pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
                     break;
+                }
             }
 
             pictureBox1.Image = pBitmap;
