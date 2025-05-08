@@ -1,4 +1,7 @@
-.vs
-bin
-obj
-Debug
+.vs/
+bin/
+obj/
+Debug/
+Release/
+packages/
+B11217048/x64/
