@@ -126,17 +126,26 @@ namespace DIP
                 {
                     textBox1.Text = trackBar1.Value.ToString();
 
-                    int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                    int[] g = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] R, G, B;
+                    ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
+
+                    int[] processedR = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] processedG = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] processedB = new int[NpBitmap.Width * NpBitmap.Height];
                     unsafe
                     {
-                        fixed (int* f0 = f) fixed (int* g0 = g)
+                        fixed (int* srcR = R, dstR = processedR)
+                        fixed (int* srcG = G, dstG = processedG)
+                        fixed (int* srcB = B, dstB = processedB)
                         {
-                            ImageProcessUtils.brightness(f0, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, g0);
+                            // 進行亮度的調整
+                            ImageProcessUtils.brightness(srcR, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, dstR);
+                            ImageProcessUtils.brightness(srcG, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, dstG);
+                            ImageProcessUtils.brightness(srcB, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, dstB);
                         }
                     }
 
-                    pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
+                    pBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, NpBitmap.Width, NpBitmap.Height);
                     break;
                 }
 
@@ -145,17 +154,26 @@ namespace DIP
                     double c = (double)trackBar1.Value / 100;
                     textBox1.Text = ((double)trackBar1.Value / 100).ToString();
 
-                    int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                    int[] g = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] R, G, B;
+                    ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
+
+                    int[] processedR = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] processedG = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] processedB = new int[NpBitmap.Width * NpBitmap.Height];
                     unsafe
                     {
-                        fixed (int* f0 = f) fixed (int* g0 = g)
+                        fixed (int* srcR = R, dstR = processedR)
+                        fixed (int* srcG = G, dstG = processedG)
+                        fixed (int* srcB = B, dstB = processedB)
                         {
-                            ImageProcessUtils.contrast(f0, NpBitmap.Width, NpBitmap.Height, c, g0);
+                            // 進行對比度的調整
+                            ImageProcessUtils.contrast(srcR, NpBitmap.Width, NpBitmap.Height, c, dstR);
+                            ImageProcessUtils.contrast(srcG, NpBitmap.Width, NpBitmap.Height, c, dstG);
+                            ImageProcessUtils.contrast(srcB, NpBitmap.Width, NpBitmap.Height, c, dstB);
                         }
                     }
 
-                    pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
+                    pBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, NpBitmap.Width, NpBitmap.Height);
                     break;
                 }
 
@@ -163,17 +181,26 @@ namespace DIP
                 {
                     textBox1.Text = trackBar1.Value.ToString();
 
-                    int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                    int[] g = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] R, G, B;
+                    ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
+
+                    int[] processedR = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] processedG = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] processedB = new int[NpBitmap.Width * NpBitmap.Height];
                     unsafe
                     {
-                        fixed (int* f0 = f) fixed (int* g0 = g)
+                        fixed (int* srcR = R, dstR = processedR)
+                        fixed (int* srcG = G, dstG = processedG)
+                        fixed (int* srcB = B, dstB = processedB)
                         {
-                            ImageProcessUtils.averagefilter(f0, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, g0);
+                            // 進行平均濾波的處理
+                            ImageProcessUtils.averagefilter(srcR, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, dstR);
+                            ImageProcessUtils.averagefilter(srcG, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, dstG);
+                            ImageProcessUtils.averagefilter(srcB, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, dstB);
                         }
                     }
 
-                    pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
+                    pBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, NpBitmap.Width, NpBitmap.Height);
                     break;
                 }
 
@@ -199,17 +226,26 @@ namespace DIP
                         int new_weight = (int)Math.Round(height * Math.Abs(Math.Sin(theta)) + width * Math.Abs(Math.Cos(theta)));
                         int new_height = (int)Math.Round(height * Math.Abs(Math.Cos(theta)) + width * Math.Abs(Math.Sin(theta)));
 
-                        int[] f = ImageProcessUtils.BitmapToArray(bitmapCopy);
-                        int[] g = new int[new_weight * new_height];
+                        int[] R, G, B;
+                        ImageProcessUtils.BitmapToRGBArrays(bitmapCopy, out R, out G, out B);
+
+                        int[] processedR = new int[new_weight * new_height];
+                        int[] processedG = new int[new_weight * new_height];
+                        int[] processedB = new int[new_weight * new_height];
                         unsafe
                         {
-                            fixed (int* f0 = f) fixed (int* g0 = g)
+                            fixed (int* srcR = R, dstR = processedR)
+                            fixed (int* srcG = G, dstG = processedG)
+                            fixed (int* srcB = B, dstB = processedB)
                             {
-                                ImageProcessUtils.customrotationangle(f0, width, height, trackBarValue, g0);
+                                // 進行自訂旋轉角度的處理
+                                ImageProcessUtils.customrotationangle(srcR, width, height, trackBarValue, dstR);
+                                ImageProcessUtils.customrotationangle(srcG, width, height, trackBarValue, dstG);
+                                ImageProcessUtils.customrotationangle(srcB, width, height, trackBarValue, dstB);
                             }
                         }
 
-                        Bitmap rotatedBitmap = ImageProcessUtils.ArrayToBitmap(g, new_weight, new_height);
+                        Bitmap rotatedBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, new_weight, new_height);
 
                         pictureBox1.Invoke((MethodInvoker)delegate
                         {
@@ -232,17 +268,26 @@ namespace DIP
                     customlocation[2] = selectionEnd.X;
                     customlocation[3] = selectionEnd.Y;
 
-                    int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
-                    int[] g = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] R, G, B;
+                    ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
+                    
+                    int[] processedR = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] processedG = new int[NpBitmap.Width * NpBitmap.Height];
+                    int[] processedB = new int[NpBitmap.Width * NpBitmap.Height];
                     unsafe
                     {
-                        fixed (int* f0 = f) fixed (int* g0 = g)
+                        fixed (int* srcR = R, dstR = processedR)
+                        fixed (int* srcG = G, dstG = processedG)
+                        fixed (int* srcB = B, dstB = processedB)
                         {
-                            ImageProcessUtils.mosaic(f0, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, customlocation, g0);
+                            // 進行局部馬賽克的處理
+                            ImageProcessUtils.mosaic(srcR, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, customlocation, dstR);
+                            ImageProcessUtils.mosaic(srcG, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, customlocation, dstG);
+                            ImageProcessUtils.mosaic(srcB, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, customlocation, dstB);
                         }
                     }
 
-                    pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
+                    pBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, NpBitmap.Width, NpBitmap.Height);
                     break;
                 }
             }
@@ -292,10 +337,10 @@ namespace DIP
         {
             if (Select == "LocalMosaic" && selectionRect.Width > 0 && selectionRect.Height > 0)
             {
-                // 绘制红色的矩形框
+                // 繪製紅色的矩形框
                 using (Pen pen = new Pen(Color.Red, 2))
                 {
-                    e.Graphics.DrawRectangle(pen, selectionRect);  // 绘制矩形框
+                    e.Graphics.DrawRectangle(pen, selectionRect);
                 }
             }
         }

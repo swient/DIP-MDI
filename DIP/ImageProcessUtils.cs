@@ -263,5 +263,104 @@ namespace DIP
 
             return myBitmap;
         }
+
+        // 將 Bitmap 圖像轉換為三個 RGB 陣列
+        public static void BitmapToRGBArrays(Bitmap myBitmap, out int[] R, out int[] G, out int[] B)
+        {
+            if (myBitmap == null)
+                throw new ArgumentNullException(nameof(myBitmap), "傳入的 Bitmap 不能為 null");
+
+            R = new int[myBitmap.Width * myBitmap.Height];
+            G = new int[myBitmap.Width * myBitmap.Height];
+            B = new int[myBitmap.Width * myBitmap.Height];
+            BitmapData byteArray = null;
+            try
+            {
+                // 支援 24bppRgb, 32bppArgb, 32bppRgb
+                PixelFormat pf = myBitmap.PixelFormat;
+                if (pf != PixelFormat.Format24bppRgb && pf != PixelFormat.Format32bppArgb && pf != PixelFormat.Format32bppRgb)
+                    throw new NotSupportedException("僅支援 24bppRgb, 32bppArgb, 32bppRgb 格式");
+
+                byteArray = myBitmap.LockBits(new Rectangle(0, 0, myBitmap.Width, myBitmap.Height),
+                                              ImageLockMode.ReadOnly, pf);
+                int pixelSize = Image.GetPixelFormatSize(pf) / 8;
+                unsafe
+                {
+                    byte* imgPtr = (byte*)byteArray.Scan0;
+                    for (int y = 0; y < myBitmap.Height; y++)
+                    {
+                        for (int x = 0; x < myBitmap.Width; x++)
+                        {
+                            int index = x + myBitmap.Width * y;
+                            B[index] = imgPtr[0];
+                            G[index] = imgPtr[1];
+                            R[index] = imgPtr[2];
+                            imgPtr += pixelSize;
+                        }
+                        imgPtr += byteArray.Stride - myBitmap.Width * pixelSize;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("將 Bitmap 轉換為 RGB 陣列時發生錯誤", ex);
+            }
+            finally
+            {
+                if (byteArray != null) myBitmap.UnlockBits(byteArray);
+            }
+        }
+
+        // 將三個 RGB 陣列轉換為 Bitmap 圖像
+        public static Bitmap RGBArraysToBitmap(int[] R, int[] G, int[] B, int Width, int Height)
+        {
+            if (R == null || G == null || B == null)
+                throw new ArgumentNullException("RGB 陣列不能為 null");
+            if (R.Length != G.Length || R.Length != B.Length)
+                throw new ArgumentException("RGB 陣列長度必須一致");
+            if (R.Length < Width * Height)
+                throw new ArgumentException("RGB 陣列長度不足");
+            if (Width <= 0 || Height <= 0)
+                throw new ArgumentException("寬高必須大於0");
+
+            Bitmap myBitmap = new Bitmap(Width, Height, PixelFormat.Format24bppRgb);
+            BitmapData byteArray = null;
+            try
+            {
+                byteArray = myBitmap.LockBits(new Rectangle(0, 0, Width, Height),
+                                              ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+                unsafe
+                {
+                    byte* imgPtr = (byte*)byteArray.Scan0;
+                    for (int y = 0; y < Height; y++)
+                    {
+                        for (int x = 0; x < Width; x++)
+                        {
+                            int index = x + Width * y;
+                            imgPtr[0] = (byte)Math.Max(0, Math.Min(255, B[index]));
+                            imgPtr[1] = (byte)Math.Max(0, Math.Min(255, G[index]));
+                            imgPtr[2] = (byte)Math.Max(0, Math.Min(255, R[index]));
+                            imgPtr += 3;
+                        }
+                        imgPtr += byteArray.Stride - Width * 3;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // 處理異常，釋放位圖資源
+                if (myBitmap != null)
+                {
+                    myBitmap.Dispose();
+                }
+
+                throw new InvalidOperationException("將 RGB 陣列轉換為 Bitmap 時發生錯誤", ex);
+            }
+            finally
+            {
+                if (byteArray != null) myBitmap.UnlockBits(byteArray);
+            }
+            return myBitmap;
+        }
     }
 }

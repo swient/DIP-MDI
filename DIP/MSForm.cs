@@ -21,7 +21,6 @@ namespace DIP
         internal Form plotForm = null;
         internal Bitmap pBitmap;
         internal ToolStripStatusLabel pf1;
-        int w, h;
 
         public MSForm()
         {
@@ -35,20 +34,15 @@ namespace DIP
         {
             bmp_dip(pBitmap);
             pf1.Text = "(Width,Height)=(" + pBitmap.Width + "," + pBitmap.Height + ")";
-            w = pBitmap.Width;
-            h = pBitmap.Height;
         }
 
         private void bmp_dip(Bitmap pBitmap)
         {
-            this.Width = (int)(pBitmap.Width * 1.5) + (this.Width - this.ClientRectangle.Width);
-            this.Height = (int)(pBitmap.Height * 1.5) + (this.Height - this.ClientRectangle.Height);
+            this.Width = pBitmap.Width + 100 + (this.Width - this.ClientRectangle.Width);
+            this.Height = pBitmap.Height + 100 + tabControl1.ItemSize.Height + (this.Height - this.ClientRectangle.Height);
 
-            if (this.Width < 400 || this.Height < 400)
-            {
-                this.Width = 400;
-                this.Height = 400;
-            }
+            if (pBitmap.Width < 256) this.Width = 356 + (this.Width - this.ClientRectangle.Width);
+            if (pBitmap.Height < 256) this.Height = 356 + tabControl1.ItemSize.Height + (this.Height - this.ClientRectangle.Height);
         }
 
         public void AddImageTab(string title, Bitmap image)
@@ -118,16 +112,16 @@ namespace DIP
             var pictureBox = tabControl1.SelectedTab.Controls.OfType<PictureBox>().FirstOrDefault();
             if (pictureBox != null)
             {
+                // 檢查新圖片是否有改變大小，若是則調整視窗大小
+                if (newImage.Width != pictureBox.Image.Width || newImage.Height != pictureBox.Image.Height)
+                {
+                    bmp_dip(newImage);
+                }
+
                 if (pictureBox.Image != null)
                     pictureBox.Image.Dispose();
 
                 pictureBox.Image = newImage;
-
-                // 檢查新圖片是否大於目前視窗客戶區，若是則調整視窗大小
-                if (newImage.Width > this.ClientRectangle.Width || newImage.Height > this.ClientRectangle.Height)
-                {
-                    bmp_dip(newImage);
-                }
             }
         }
 
@@ -293,6 +287,12 @@ namespace DIP
                     var pictureBox = tabPage.Controls.OfType<PictureBox>().FirstOrDefault();
                     if (pictureBox != null)
                     {
+                        // 檢查新圖片是否有改變大小，若是則調整視窗大小
+                        if (original.Width != pictureBox.Image.Width || original.Height != pictureBox.Image.Height)
+                        {
+                            bmp_dip(original);
+                        }
+
                         // 釋放當前圖片
                         pictureBox.Image?.Dispose();
                         // 還原為原始圖片

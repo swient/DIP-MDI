@@ -59,8 +59,6 @@ namespace DIP
 
         private void button1_Click(object sender, EventArgs e)
         {
-            int[] f;
-            int[] g;
             int divide;
             int[] customize = new int[9];
             if (!int.TryParse(textBox1.Text, out customize[0]) ||
@@ -84,17 +82,26 @@ namespace DIP
                 return;
             }
 
-            f = ImageProcessUtils.BitmapToArray(NpBitmap);
-            g = new int[NpBitmap.Width * NpBitmap.Height];
+            int[] R, G, B;
+            ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
+            
+            int[] processedR = new int[NpBitmap.Width * NpBitmap.Height];
+            int[] processedG = new int[NpBitmap.Width * NpBitmap.Height];
+            int[] processedB = new int[NpBitmap.Width * NpBitmap.Height];
             unsafe
             {
-                fixed (int* f0 = f) fixed (int* g0 = g)
+                fixed (int* srcR = R, dstR = processedR)
+                fixed (int* srcG = G, dstG = processedG)
+                fixed (int* srcB = B, dstB = processedB)
                 {
-                    ImageProcessUtils.customfilter(f0, NpBitmap.Width, NpBitmap.Height, divide, customize, g0);
+                    // 進行自訂濾波器的處理
+                    ImageProcessUtils.customfilter(srcR, NpBitmap.Width, NpBitmap.Height, divide, customize, dstR);
+                    ImageProcessUtils.customfilter(srcG, NpBitmap.Width, NpBitmap.Height, divide, customize, dstG);
+                    ImageProcessUtils.customfilter(srcB, NpBitmap.Width, NpBitmap.Height, divide, customize, dstB);
                 }
             }
 
-            pBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
+            pBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, NpBitmap.Width, NpBitmap.Height);
 
             pictureBox2.Image = pBitmap;
         }
