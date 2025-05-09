@@ -20,6 +20,8 @@ namespace DIP
         internal Bitmap NpBitmap;
         internal Bitmap pBitmap;
         internal ToolStripStatusLabel pf1;
+        internal ToolStripStatusLabel pf2;
+        internal ToolStripStatusLabel pf3;
         internal string OriginalTabTitle;
         public new int Select;
 
@@ -114,6 +116,8 @@ namespace DIP
                 msForm = new MSForm();
                 msForm.MdiParent = this.MdiParent;
                 msForm.pf1 = this.pf1;
+                msForm.pf2 = this.pf2;
+                msForm.pf3 = this.pf3;
                 msForm.pBitmap = new Bitmap(pBitmap);
                 msForm.AddImageTab(OriginalTabTitle, new Bitmap(pBitmap));
                 msForm.Show();

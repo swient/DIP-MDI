@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -31,6 +31,8 @@ namespace DIP
         {
             this.IsMdiContainer = true; // 設定為 MDI 容器
             this.toolStripStatusLabel1.Text = "";
+            this.toolStripStatusLabel2.Text = "";
+            this.toolStripStatusLabel3.Text = "";
             UpdateMenuState(); // 初始化選單狀態
         }
 
@@ -86,6 +88,8 @@ namespace DIP
                             childForm = new MSForm();
                             childForm.MdiParent = this;
                             childForm.pf1 = toolStripStatusLabel1;
+                            childForm.pf2 = toolStripStatusLabel2;
+                            childForm.pf3 = toolStripStatusLabel3;
                             childForm.pBitmap = new Bitmap(NpBitmap);
                             childForm.Show();
                         }
@@ -252,6 +256,8 @@ namespace DIP
                 childForm.Select = "LocalMosaic";
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
+                childForm.pf2 = toolStripStatusLabel2;
+                childForm.pf3 = toolStripStatusLabel3;
                 childForm.NpBitmap = NpBitmap;
                 childForm.OriginalTabTitle = msForm.GetCurrentTabTitle();
                 childForm.Show();
@@ -279,6 +285,8 @@ namespace DIP
                 childForm.Select = "Brightness";
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
+                childForm.pf2 = toolStripStatusLabel2;
+                childForm.pf3 = toolStripStatusLabel3;
                 childForm.NpBitmap = NpBitmap;
                 childForm.OriginalTabTitle = msForm.GetCurrentTabTitle();
                 childForm.Show();
@@ -306,6 +314,8 @@ namespace DIP
                 childForm.Select = "Contrast";
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
+                childForm.pf2 = toolStripStatusLabel2;
+                childForm.pf3 = toolStripStatusLabel3;
                 childForm.NpBitmap = NpBitmap;
                 childForm.OriginalTabTitle = msForm.GetCurrentTabTitle();
                 childForm.Show();
@@ -378,13 +388,14 @@ namespace DIP
                 // 將 Bitmap 轉換為陣列
                 int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
                 int[] g = new int[NpBitmap.Width * NpBitmap.Height];
-
+                int t = 0;
+                
                 // 使用 unsafe 區域進行指針處理
                 unsafe
                 {
                     fixed (int* f0 = f) fixed (int* g0 = g)
                     {
-                        ImageProcessUtils.otsuthreshold(f0, NpBitmap.Width, NpBitmap.Height, g0); // 進行二值化的處理
+                        ImageProcessUtils.otsuthreshold(f0, NpBitmap.Width, NpBitmap.Height, g0, &t); // 進行二值化的處理
                     }
                 }
 
@@ -392,6 +403,8 @@ namespace DIP
                 NpBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
                 msForm.SetCurrentTabImage(NpBitmap);
                 msForm.UpdateHistogram(NpBitmap);
+                msForm.SetCurrentTabThreshold(t);
+                msForm.UpdateStatusBar();
             }
             else
             {
@@ -484,6 +497,8 @@ namespace DIP
                 childForm.Select = "AverageFilter";
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
+                childForm.pf2 = toolStripStatusLabel2;
+                childForm.pf3 = toolStripStatusLabel3;
                 childForm.NpBitmap = NpBitmap;
                 childForm.OriginalTabTitle = msForm.GetCurrentTabTitle();
                 childForm.Show();
@@ -547,6 +562,8 @@ namespace DIP
                 FilterForm childForm = new FilterForm();
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
+                childForm.pf2 = toolStripStatusLabel2;
+                childForm.pf3 = toolStripStatusLabel3;
                 childForm.NpBitmap = NpBitmap;
                 childForm.OriginalTabTitle = msForm.GetCurrentTabTitle();
                 childForm.Show();
@@ -721,6 +738,8 @@ namespace DIP
                 childForm.Select = "CustomRotation";
                 childForm.MdiParent = this;
                 childForm.pf1 = toolStripStatusLabel1;
+                childForm.pf2 = toolStripStatusLabel2;
+                childForm.pf3 = toolStripStatusLabel3;
                 childForm.NpBitmap = NpBitmap;
                 childForm.OriginalTabTitle = msForm.GetCurrentTabTitle();
                 childForm.Show();

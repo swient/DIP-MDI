@@ -21,6 +21,8 @@ namespace DIP
         internal Form plotForm = null;
         internal Bitmap pBitmap;
         internal ToolStripStatusLabel pf1;
+        internal ToolStripStatusLabel pf2;
+        internal ToolStripStatusLabel pf3;
 
         public MSForm()
         {
@@ -33,7 +35,6 @@ namespace DIP
         private void MSForm_Load(object sender, EventArgs e)
         {
             bmp_dip(pBitmap);
-            pf1.Text = "(Width,Height)=(" + pBitmap.Width + "," + pBitmap.Height + ")";
         }
 
         private void bmp_dip(Bitmap pBitmap)
@@ -85,6 +86,8 @@ namespace DIP
             {
                 bmp_dip(image);
             }
+
+            UpdateStatusBar();
         }
 
         public string GetCurrentTabTitle()
@@ -125,12 +128,67 @@ namespace DIP
             }
         }
 
+        public void SetCurrentTabThreshold(int t)
+        {
+            if (tabControl1.SelectedTab != null)
+                tabControl1.SelectedTab.Tag = t;
+        }
+
+        public int? GetCurrentTabThreshold()
+        {
+            if (tabControl1.SelectedTab != null && tabControl1.SelectedTab.Tag is int t)
+                return t;
+            return null;
+        }
+
+        public void UpdateStatusBar(int? x = null, int? y = null, Color? pixel = null)
+        {
+            if (pf1 == null || pf2 == null || pf3 == null) return;
+
+            // pf1: (Width,Height)
+            Bitmap image = GetCurrentTabImage();
+            if (image != null)
+            { 
+                pf1.Text = $"(Width,Height): ({image.Width},{image.Height})";
+                pf1.BorderSides = ToolStripStatusLabelBorderSides.All;
+            }
+            else
+            {
+                pf1.Text = "";
+                pf1.BorderSides = ToolStripStatusLabelBorderSides.None;
+            }
+
+            // pf2: (X, Y) 與 RGB
+            if (x.HasValue && y.HasValue && pixel.HasValue)
+            {
+                pf2.Text = $"(X, Y): ({x}, {y})  RGB: ({pixel.Value.R}, {pixel.Value.G}, {pixel.Value.B})";
+                pf2.BorderSides = ToolStripStatusLabelBorderSides.All;
+            }
+            else
+            {
+                pf2.Text = "";
+                pf2.BorderSides = ToolStripStatusLabelBorderSides.None;
+            }
+
+            // pf3: Threshold
+            int? threshold = GetCurrentTabThreshold();
+            if (threshold.HasValue)
+            {
+                pf3.Text = $"Threshold: {threshold.Value}";
+                pf3.BorderSides = ToolStripStatusLabelBorderSides.All;
+            }
+            else
+            {
+                pf3.Text = "";
+                pf3.BorderSides = ToolStripStatusLabelBorderSides.None;
+            }
+        }
+
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
             var pictureBox = sender as PictureBox;
             if (pictureBox?.Image == null)
             {
-                pf1.Text = "沒有可用的圖片";
                 return;
             }
 
@@ -144,12 +202,12 @@ namespace DIP
             if (imgX >= 0 && imgX < pictureBox.Image.Width &&
                 imgY >= 0 && imgY < pictureBox.Image.Height)
             {
-                Color pixel = ((Bitmap)pictureBox.Image).GetPixel(imgX, imgY);
-                pf1.Text = $"(X, Y): ({imgX}, {imgY}) | RGB: ({pixel.R}, {pixel.G}, {pixel.B})";
+                Color imgPixel = ((Bitmap)pictureBox.Image).GetPixel(imgX, imgY);
+                UpdateStatusBar(x: imgX, y: imgY, pixel: imgPixel);
             }
             else
             {
-                pf1.Text = $"(Width,Height)=({pictureBox.Image.Width},{pictureBox.Image.Height})";
+                UpdateStatusBar(x: null, y: null, pixel: null);
             }
         }
 
@@ -157,6 +215,7 @@ namespace DIP
         {
             pBitmap = GetCurrentTabImage();
             UpdateHistogram(pBitmap);
+            UpdateStatusBar();
         }
 
         public void UpdateHistogram(Bitmap pBitmap)
@@ -284,6 +343,8 @@ namespace DIP
 
                 if (tabPage != null)
                 {
+                    tabPage.Tag = null;
+
                     var pictureBox = tabPage.Controls.OfType<PictureBox>().FirstOrDefault();
                     if (pictureBox != null)
                     {
@@ -334,6 +395,26 @@ namespace DIP
                 plotForm.Dispose();
                 plotForm.Close();
             }
+            // 釋放所有 tab 內的圖片資源並釋放 tab
+            while (tabControl1.TabPages.Count > 0)
+            {
+                TabPage tab = tabControl1.TabPages[0];
+                var pictureBox = tab.Controls.OfType<PictureBox>().FirstOrDefault();
+                if (pictureBox?.Image != null)
+                {
+                    pictureBox.Image.Dispose();
+                    pictureBox.Image = null;
+                }
+                tabControl1.TabPages.Remove(tab);
+                tab.Dispose();
+            }
+            // 釋放 originalImages 字典的 Bitmap
+            foreach (var bmp in originalImages.Values)
+            {
+                bmp.Dispose();
+            }
+            originalImages.Clear();
+            UpdateStatusBar();
         }
     }
 }

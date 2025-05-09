@@ -19,6 +19,8 @@ namespace DIP
         internal Bitmap NpBitmap;
         internal Bitmap pBitmap;
         internal ToolStripStatusLabel pf1;
+        internal ToolStripStatusLabel pf2;
+        internal ToolStripStatusLabel pf3;
         internal string OriginalTabTitle;
         public new string Select;
         private bool isSelecting = false; // 是否正在框選
@@ -353,6 +355,8 @@ namespace DIP
                 msForm = new MSForm();
                 msForm.MdiParent = this.MdiParent;
                 msForm.pf1 = this.pf1;
+                msForm.pf2 = this.pf2;
+                msForm.pf3 = this.pf3;
                 
                 // 創建新 Bitmap 副本並傳遞給 MSForm
                 msForm.pBitmap = new Bitmap(pBitmap);

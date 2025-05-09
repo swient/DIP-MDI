@@ -178,7 +178,7 @@ extern "C" {
         free(cdf);
     }
 
-    __declspec(dllexport) void otsuthreshold(int* f, int w, int h, int* g)
+    __declspec(dllexport) void otsuthreshold(int* f, int w, int h, int* g, int* threshold)
     {
         int* hist = (int*)calloc(256, sizeof(int));
 
@@ -200,7 +200,7 @@ extern "C" {
         }
 
         double max_variance = 0.0;
-        int optimal_threshold = 0;
+        if (threshold) *threshold = 0;
 
         long long w0 = 0; // 背景像素數
         double sum0 = 0.0; // 背景灰階和
@@ -225,12 +225,12 @@ extern "C" {
             // 找到最大變異數對應的閾值
             if (between_class_variance > max_variance) {
                 max_variance = between_class_variance;
-                optimal_threshold = t;
+                if (threshold) *threshold = t;
             }
         }
 
         for (int i = 0; i < w * h; i++) {
-            g[i] = (f[i] >= optimal_threshold) ? 255 : 0;
+            g[i] = (f[i] >= *threshold) ? 255 : 0;
         }
 
         free(hist);
