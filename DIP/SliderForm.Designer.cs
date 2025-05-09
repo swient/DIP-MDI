@@ -1,4 +1,4 @@
-﻿namespace DIP
+namespace DIP
 {
     partial class SliderForm
     {

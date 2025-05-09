@@ -1,4 +1,4 @@
-﻿// pch.cpp: 對應到先行編譯標頭的來源檔案
+// pch.cpp: 對應到先行編譯標頭的來源檔案
 
 #include "pch.h"
 #include <stdio.h>
