@@ -762,22 +762,31 @@ namespace DIP
             if (ActiveMdiChild is MSForm msForm)
             {
                 NpBitmap = msForm.GetCurrentTabImage();
-                Bitmap flippedBitmap = new Bitmap(NpBitmap);
 
-                // 遍歷原圖的每個像素
-                for (int x = 0; x < flippedBitmap.Width; x++)
+                // 將 Bitmap 轉換為三個 RGB 陣列
+                int[] R, G, B;
+                ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
+
+                int[] processedR = new int[NpBitmap.Width * NpBitmap.Height];
+                int[] processedG = new int[NpBitmap.Width * NpBitmap.Height];
+                int[] processedB = new int[NpBitmap.Width * NpBitmap.Height];
+
+                // 使用 unsafe 區域進行指針處理
+                unsafe
                 {
-                    for (int y = 0; y < flippedBitmap.Height; y++)
+                    fixed (int* srcR = R, dstR = processedR)
+                    fixed (int* srcG = G, dstG = processedG)
+                    fixed (int* srcB = B, dstB = processedB)
                     {
-                        // 計算左右翻轉後的位置
-                        int newX = flippedBitmap.Width - 1 - x;
-                        int newY = y;
-
-                        // 設定像素
-                        NpBitmap.SetPixel(newX, newY, flippedBitmap.GetPixel(x, y));
+                        // 進行水平翻轉的處理
+                        ImageProcessUtils.fliphorizontal(srcR, NpBitmap.Width, NpBitmap.Height, dstR);
+                        ImageProcessUtils.fliphorizontal(srcG, NpBitmap.Width, NpBitmap.Height, dstG);
+                        ImageProcessUtils.fliphorizontal(srcB, NpBitmap.Width, NpBitmap.Height, dstB);
                     }
                 }
 
+                // 將處理後的陣列轉換回 Bitmap
+                NpBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, NpBitmap.Width, NpBitmap.Height);
                 msForm.SetCurrentTabImage(NpBitmap);
                 msForm.UpdateHistogram(NpBitmap);
             }
@@ -799,22 +808,31 @@ namespace DIP
             if (ActiveMdiChild is MSForm msForm)
             {
                 NpBitmap = msForm.GetCurrentTabImage();
-                Bitmap flippedBitmap = new Bitmap(NpBitmap);
 
-                // 遍歷原圖的每個像素
-                for (int x = 0; x < flippedBitmap.Width; x++)
+                // 將 Bitmap 轉換為三個 RGB 陣列
+                int[] R, G, B;
+                ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
+
+                int[] processedR = new int[NpBitmap.Width * NpBitmap.Height];
+                int[] processedG = new int[NpBitmap.Width * NpBitmap.Height];
+                int[] processedB = new int[NpBitmap.Width * NpBitmap.Height];
+
+                // 使用 unsafe 區域進行指針處理
+                unsafe
                 {
-                    for (int y = 0; y < flippedBitmap.Height; y++)
+                    fixed (int* srcR = R, dstR = processedR)
+                    fixed (int* srcG = G, dstG = processedG)
+                    fixed (int* srcB = B, dstB = processedB)
                     {
-                        // 計算上下翻轉後的位置
-                        int newX = x;
-                        int newY = flippedBitmap.Height - 1 - y;
-
-                        // 設定像素
-                        NpBitmap.SetPixel(newX, newY, flippedBitmap.GetPixel(x, y));
+                        // 進行垂直翻轉的處理
+                        ImageProcessUtils.flipvertical(srcR, NpBitmap.Width, NpBitmap.Height, dstR);
+                        ImageProcessUtils.flipvertical(srcG, NpBitmap.Width, NpBitmap.Height, dstG);
+                        ImageProcessUtils.flipvertical(srcB, NpBitmap.Width, NpBitmap.Height, dstB);
                     }
                 }
 
+                // 將處理後的陣列轉換回 Bitmap
+                NpBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, NpBitmap.Width, NpBitmap.Height);
                 msForm.SetCurrentTabImage(NpBitmap);
                 msForm.UpdateHistogram(NpBitmap);
             }

@@ -128,26 +128,48 @@ namespace DIP
                 {
                     textBox1.Text = trackBar1.Value.ToString();
 
-                    int[] R, G, B;
-                    ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
-
-                    int[] processedR = new int[NpBitmap.Width * NpBitmap.Height];
-                    int[] processedG = new int[NpBitmap.Width * NpBitmap.Height];
-                    int[] processedB = new int[NpBitmap.Width * NpBitmap.Height];
-                    unsafe
+                    Task.Run(() =>
                     {
-                        fixed (int* srcR = R, dstR = processedR)
-                        fixed (int* srcG = G, dstG = processedG)
-                        fixed (int* srcB = B, dstB = processedB)
-                        {
-                            // 進行亮度的調整
-                            ImageProcessUtils.brightness(srcR, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, dstR);
-                            ImageProcessUtils.brightness(srcG, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, dstG);
-                            ImageProcessUtils.brightness(srcB, NpBitmap.Width, NpBitmap.Height, trackBar1.Value, dstB);
-                        }
-                    }
+                        Bitmap bitmapCopy = null;
+                        int width = 0, height = 0, value = 0;
 
-                    pBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, NpBitmap.Width, NpBitmap.Height);
+                        pictureBox1.Invoke((MethodInvoker)delegate
+                        {
+                            bitmapCopy = new Bitmap(NpBitmap);
+                            width = NpBitmap.Width;
+                            height = NpBitmap.Height;
+                            value = trackBar1.Value;
+                        });
+
+                        int[] R, G, B;
+                        ImageProcessUtils.BitmapToRGBArrays(bitmapCopy, out R, out G, out B);
+
+                        int[] processedR = new int[width * height];
+                        int[] processedG = new int[width * height];
+                        int[] processedB = new int[width * height];
+                        unsafe
+                        {
+                            fixed (int* srcR = R, dstR = processedR)
+                            fixed (int* srcG = G, dstG = processedG)
+                            fixed (int* srcB = B, dstB = processedB)
+                            {
+                                // 進行亮度的調整
+                                ImageProcessUtils.brightness(srcR, width, height, value, dstR);
+                                ImageProcessUtils.brightness(srcG, width, height, value, dstG);
+                                ImageProcessUtils.brightness(srcB, width, height, value, dstB);
+                            }
+                        }
+
+                        Bitmap resultBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, width, height);
+
+                        pictureBox1.Invoke((MethodInvoker)delegate
+                        {
+                            pBitmap = resultBitmap;
+                            pictureBox1.Image = pBitmap;
+                        });
+
+                        bitmapCopy.Dispose();
+                    });
                     break;
                 }
 
@@ -156,26 +178,49 @@ namespace DIP
                     double c = (double)trackBar1.Value / 100;
                     textBox1.Text = ((double)trackBar1.Value / 100).ToString();
 
-                    int[] R, G, B;
-                    ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
-
-                    int[] processedR = new int[NpBitmap.Width * NpBitmap.Height];
-                    int[] processedG = new int[NpBitmap.Width * NpBitmap.Height];
-                    int[] processedB = new int[NpBitmap.Width * NpBitmap.Height];
-                    unsafe
+                    Task.Run(() =>
                     {
-                        fixed (int* srcR = R, dstR = processedR)
-                        fixed (int* srcG = G, dstG = processedG)
-                        fixed (int* srcB = B, dstB = processedB)
-                        {
-                            // 進行對比度的調整
-                            ImageProcessUtils.contrast(srcR, NpBitmap.Width, NpBitmap.Height, c, dstR);
-                            ImageProcessUtils.contrast(srcG, NpBitmap.Width, NpBitmap.Height, c, dstG);
-                            ImageProcessUtils.contrast(srcB, NpBitmap.Width, NpBitmap.Height, c, dstB);
-                        }
-                    }
+                        Bitmap bitmapCopy = null;
+                        int width = 0, height = 0;
+                        double value = 0;
 
-                    pBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, NpBitmap.Width, NpBitmap.Height);
+                        pictureBox1.Invoke((MethodInvoker)delegate
+                        {
+                            bitmapCopy = new Bitmap(NpBitmap);
+                            width = NpBitmap.Width;
+                            height = NpBitmap.Height;
+                            value = (double)trackBar1.Value / 100;
+                        });
+
+                        int[] R, G, B;
+                        ImageProcessUtils.BitmapToRGBArrays(bitmapCopy, out R, out G, out B);
+
+                        int[] processedR = new int[width * height];
+                        int[] processedG = new int[width * height];
+                        int[] processedB = new int[width * height];
+                        unsafe
+                        {
+                            fixed (int* srcR = R, dstR = processedR)
+                            fixed (int* srcG = G, dstG = processedG)
+                            fixed (int* srcB = B, dstB = processedB)
+                            {
+                                // 進行對比度的調整
+                                ImageProcessUtils.contrast(srcR, width, height, value, dstR);
+                                ImageProcessUtils.contrast(srcG, width, height, value, dstG);
+                                ImageProcessUtils.contrast(srcB, width, height, value, dstB);
+                            }
+                        }
+
+                        Bitmap resultBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, width, height);
+
+                        pictureBox1.Invoke((MethodInvoker)delegate
+                        {
+                            pBitmap = resultBitmap;
+                            pictureBox1.Image = pBitmap;
+                        });
+
+                        bitmapCopy.Dispose();
+                    });
                     break;
                 }
 

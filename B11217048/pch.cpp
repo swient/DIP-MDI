@@ -62,6 +62,24 @@ extern "C" {
         }
     }
 
+    __declspec(dllexport) void fliphorizontal(int* f, int w, int h, int* g)
+    {
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                g[y * w + x] = f[y * w + (w - 1 - x)];
+            }
+        }
+    }
+
+    __declspec(dllexport) void flipvertical(int* f, int w, int h, int* g)
+    {
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                g[y * w + x] = f[(h - 1 - y) * w + x];
+            }
+        }
+    }
+    
     __declspec(dllexport) void mosaic(int* f, int w, int h, int s, int* c, int* g)
     {
         int x_start = c[0], x_end = c[2];
