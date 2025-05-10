@@ -53,43 +53,43 @@ extern "C" {
         return array2D;
     }
 
-    __declspec(dllexport) void negative(int* f, int w, int h, int* g)
+    __declspec(dllexport) void negative(int* src, int* dst, int srcW, int srcH)
     {
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-				g[y * w + x] = 255 - f[y * w + x];
+        for (int y = 0; y < srcH; y++) {
+            for (int x = 0; x < srcW; x++) {
+				dst[y * srcW + x] = 255 - src[y * srcW + x];
             }
         }
     }
 
-    __declspec(dllexport) void fliphorizontal(int* f, int w, int h, int* g)
+    __declspec(dllexport) void fliphorizontal(int* src, int* dst, int srcW, int srcH)
     {
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                g[y * w + x] = f[y * w + (w - 1 - x)];
+        for (int y = 0; y < srcH; y++) {
+            for (int x = 0; x < srcW; x++) {
+                dst[y * srcW + x] = src[y * srcW + (srcW - 1 - x)];
             }
         }
     }
 
-    __declspec(dllexport) void flipvertical(int* f, int w, int h, int* g)
+    __declspec(dllexport) void flipvertical(int* src, int* dst, int srcW, int srcH)
     {
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                g[y * w + x] = f[(h - 1 - y) * w + x];
+        for (int y = 0; y < srcH; y++) {
+            for (int x = 0; x < srcW; x++) {
+                dst[y * srcW + x] = src[(srcH - 1 - y) * srcW + x];
             }
         }
     }
     
-    __declspec(dllexport) void mosaic(int* f, int w, int h, int s, int* c, int* g)
+    __declspec(dllexport) void mosaic(int* src, int* dst, int srcW, int srcH, int size, int* region)
     {
-        int x_start = c[0], x_end = c[2];
-        int y_start = c[1], y_end = c[3];
+        int x_start = region[0], x_end = region[2];
+        int y_start = region[1], y_end = region[3];
 
-        int block_size = s;
+        int block_size = size;
 
         // 複製原圖 f 到結果圖 g
-        for (int i = 0; i < w * h; i++) {
-            g[i] = f[i];
+        for (int i = 0; i < srcW * srcH; i++) {
+            dst[i] = src[i];
         }
 
         // 只處理範圍內的像素
@@ -107,9 +107,9 @@ extern "C" {
                         int nx = x + dx;
                         int ny = y + dy;
 
-                        if (nx < w && ny < h)
+                        if (nx < srcW && ny < srcH)
                         {
-                            int pixel = f[ny * w + nx];
+                            int pixel = src[ny * srcW + nx];
                             sum += pixel;
                             count++;
                         }
@@ -126,9 +126,9 @@ extern "C" {
                         int nx = x + dx;
                         int ny = y + dy;
 
-                        if (nx < w && ny < h)
+                        if (nx < srcW && ny < srcH)
                         {
-                            g[ny * w + nx] = avg;
+                            dst[ny * srcW + nx] = avg;
                         }
                     }
                 }
@@ -136,25 +136,25 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) void brightness(int* f, int w, int h, int s, int* g)
+    __declspec(dllexport) void brightness(int* src, int* dst, int srcW, int srcH, int value)
     {
-        for (int i = 0; i < w * h; i++) {
-            g[i] = f[i] + s;
-            if (g[i] > 255) g[i] = 255;
-            if (g[i] < 0) g[i] = 0;
+        for (int i = 0; i < srcW * srcH; i++) {
+            dst[i] = src[i] + value;
+            if (dst[i] > 255) dst[i] = 255;
+            if (dst[i] < 0) dst[i] = 0;
         }
     }
 
-    __declspec(dllexport) void contrast(int* f, int w, int h, double s, int* g)
+    __declspec(dllexport) void contrast(int* src, int* dst, int srcW, int srcH, double value)
     {
-        for (int i = 0; i < w * h; i++) {
-            g[i] = (int)((f[i] - 128) * s + 128);
-            if (g[i] > 255) g[i] = 255;
-            if (g[i] < 0) g[i] = 0;
+        for (int i = 0; i < srcW * srcH; i++) {
+            dst[i] = (int)((src[i] - 128) * value + 128);
+            if (dst[i] > 255) dst[i] = 255;
+            if (dst[i] < 0) dst[i] = 0;
         }
     }
 
-    __declspec(dllexport) void equalization(int* f, int w, int h, int* g)
+    __declspec(dllexport) void equalization(int* src, int* dst, int srcW, int srcH)
     {
         int* hist = (int*)calloc(256, sizeof(int));
         int* cdf = (int*)calloc(256, sizeof(int));
@@ -165,9 +165,9 @@ extern "C" {
         }
 
         // 計算原始圖像的直方圖
-        for (int i = 0; i < w * h; i++) {
-            if (f[i] >= 0 && f[i] < 256) {
-                hist[f[i]]++;
+        for (int i = 0; i < srcW * srcH; i++) {
+            if (src[i] >= 0 && src[i] < 256) {
+                hist[src[i]]++;
             }
         }
 
@@ -185,9 +185,9 @@ extern "C" {
         }
 
         // 使用CDF映射原始圖像像素到输出圖像
-        for (int i = 0; i < w * h; i++) {
-			if (f[i] >= 0 && f[i] < 256) {
-				g[i] = cdf[f[i]];
+        for (int i = 0; i < srcW * srcH; i++) {
+			if (src[i] >= 0 && src[i] < 256) {
+				dst[i] = cdf[src[i]];
 			}
         }
 
@@ -196,79 +196,83 @@ extern "C" {
         free(cdf);
     }
 
-    __declspec(dllexport) void otsuthreshold(int* f, int w, int h, int* g, int* threshold)
+    __declspec(dllexport) void otsuthreshold(int* src, int* dst, int srcW, int srcH, int* threshold)
     {
-        int* hist = (int*)calloc(256, sizeof(int));
+       if (threshold == NULL) {
+           return;  
+       }
 
-        if (hist == NULL) {
-            return;
-        }
+       int* hist = (int*)calloc(256, sizeof(int));
 
-        // 計算原始圖像的直方圖
-        for (int i = 0; i < w * h; i++) {
-            if (f[i] >= 0 && f[i] < 256) {
-                hist[f[i]]++;
-            }
-        }
+       if (hist == NULL) {
+           return;
+       }
 
-        // 計算灰階總和
-        double total_intensity_sum = 0;
-        for (int i = 0; i < 256; i++) {
-            total_intensity_sum += (double)i * hist[i];
-        }
+       // 計算原始圖像的直方圖
+       for (int i = 0; i < srcW * srcH; i++) {
+           if (src[i] >= 0 && src[i] < 256) {
+               hist[src[i]]++;
+           }
+       }
 
-        double max_variance = 0.0;
-        if (threshold) *threshold = 0;
+       // 計算灰階總和
+       double total_intensity_sum = 0;
+       for (int i = 0; i < 256; i++) {
+           total_intensity_sum += (double)i * hist[i];
+       }
 
-        long long w0 = 0; // 背景像素數
-        double sum0 = 0.0; // 背景灰階和
+       double max_variance = 0.0;
+       *threshold = 0;
 
-        // 遍歷所有可能的閾值
-        for (int t = 0; t < 256; t++) {
-            w0 += hist[t]; // 累加背景像素數
-            if (w0 == 0) continue; // 如果背景像素數為0，跳過
+       long long w0 = 0; // 背景像素數
+       double sum0 = 0.0; // 背景灰階和
 
-            long long w1 = w * h - w0; // 前景像素數
-            if (w1 == 0) break; // 如果前景像素數為0，後續閾值無需計算
+       // 遍歷所有可能的閾值
+       for (int t = 0; t < 256; t++) {
+           w0 += hist[t]; // 累加背景像素數
+           if (w0 == 0) continue; // 如果背景像素數為0，跳過
 
-            sum0 += (double)t * hist[t]; // 累加背景灰階和
-            double sum1 = total_intensity_sum - sum0; // 前景灰階和
+           long long w1 = srcW * srcH - w0; // 前景像素數
+           if (w1 == 0) break; // 如果前景像素數為0，後續閾值無需計算
 
-            double mu0 = sum0 / w0; // 背景平均灰階
-            double mu1 = sum1 / w1; // 前景平均灰階
+           sum0 += (double)t * hist[t]; // 累加背景灰階和
+           double sum1 = total_intensity_sum - sum0; // 前景灰階和
 
-            // 計算組間變異數
-            double between_class_variance = (double)w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
+           double mu0 = sum0 / w0; // 背景平均灰階
+           double mu1 = sum1 / w1; // 前景平均灰階
 
-            // 找到最大變異數對應的閾值
-            if (between_class_variance > max_variance) {
-                max_variance = between_class_variance;
-                if (threshold) *threshold = t;
-            }
-        }
+           // 計算組間變異數
+           double between_class_variance = (double)w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
 
-        for (int i = 0; i < w * h; i++) {
-            g[i] = (f[i] >= *threshold) ? 255 : 0;
-        }
+           // 找到最大變異數對應的閾值
+           if (between_class_variance > max_variance) {
+               max_variance = between_class_variance;
+               *threshold = t;
+           }
+       }
 
-        free(hist);
+       for (int i = 0; i < srcW * srcH; i++) {
+           dst[i] = (src[i] >= *threshold) ? 255 : 0;
+       }
+
+       free(hist);
     }
 
-    __declspec(dllexport) void averagefilter(int* f, int w, int h, int s, int* g)
+    __declspec(dllexport) void averagefilter(int* src, int* dst, int srcW, int srcH, int size)
     {
-        int** matrix = Convert1DTo2D(f, w, h);
-        int** tempMatrix = Convert1DTo2D(g, w, h);
-        int start = (int)ceil(-s / 2) + 1;
-        int end = (int)floor(s / 2);
+        int** matrix = Convert1DTo2D(src, srcW, srcH);
+        int** tempMatrix = Convert1DTo2D(dst, srcW, srcH);
+        int start = (int)ceil(-size / 2) + 1;
+        int end = (int)floor(size / 2);
 
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
+        for (int y = 0; y < srcH; y++) {
+            for (int x = 0; x < srcW; x++) {
                 int sum = 0;
                 int count = 0;
 
                 for (int j = start; j <= end; j++) {
                     for (int i = start; i <= end; i++) {
-                        if (x + i >= 0 && x + i < w && y + j >= 0 && y + j < h) {
+                        if (x + i >= 0 && x + i < srcW && y + j >= 0 && y + j < srcH) {
                             sum += matrix[y + j][x + i];
                             count++;
                         }
@@ -278,9 +282,9 @@ extern "C" {
             }
         }
 
-        Convert2DTo1D(tempMatrix, g, w, h);
+        Convert2DTo1D(tempMatrix, dst, srcW, srcH);
 
-        for (int i = 0; i < h; i++) {
+        for (int i = 0; i < srcH; i++) {
             free(matrix[i]);
 			free(tempMatrix[i]);
         }
@@ -288,10 +292,10 @@ extern "C" {
 		free(tempMatrix);
     }
 
-    __declspec(dllexport) void highpassfilter(int* f, int w, int h, int* g)
+    __declspec(dllexport) void highpassfilter(int* src, int* dst, int srcW, int srcH)
     {
-        int** matrix = Convert1DTo2D(f, w, h);
-        int** tempMatrix = Convert1DTo2D(g, w, h);
+        int** matrix = Convert1DTo2D(src, srcW, srcH);
+        int** tempMatrix = Convert1DTo2D(dst, srcW, srcH);
         const int kernel[3][3] = {
             { -1, 0, -1 },
             { 0, 4, 0 },
@@ -301,8 +305,8 @@ extern "C" {
         int minVal = INT_MAX;
         int maxVal = INT_MIN;
 
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
+        for (int y = 0; y < srcH; y++) {
+            for (int x = 0; x < srcW; x++) {
                 int sum = 0;
 
                 for (int j = -1; j <= 1; j++) {
@@ -310,7 +314,7 @@ extern "C" {
                         int newX = x + i;
                         int newY = y + j;
 
-                        if (newX >= 0 && newX < w && newY >= 0 && newY < h) {
+                        if (newX >= 0 && newX < srcW && newY >= 0 && newY < srcH) {
                             sum += matrix[newY][newX] * kernel[j + 1][i + 1];
                         }
                     }
@@ -322,16 +326,16 @@ extern "C" {
             }
         }
 
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
+        for (int y = 0; y < srcH; y++) {
+            for (int x = 0; x < srcW; x++) {
                 int normalized = (tempMatrix[y][x] - minVal) * 255 / (maxVal - minVal);
                 tempMatrix[y][x] = min(max(normalized, 0), 255);
             }
         }
 
-        Convert2DTo1D(tempMatrix, g, w, h);
+        Convert2DTo1D(tempMatrix, dst, srcW, srcH);
 
-        for (int i = 0; i < h; i++) {
+        for (int i = 0; i < srcH; i++) {
             free(matrix[i]);
 			free(tempMatrix[i]);
         }
@@ -339,18 +343,18 @@ extern "C" {
 		free(tempMatrix);
     }
 
-	__declspec(dllexport) void customfilter(int* f, int w, int h, int d, int* c, int* g)
+	__declspec(dllexport) void customfilter(int* src, int* dst, int srcW, int srcH, int divisor, int* customKernel)
 	{
-		int** matrix = Convert1DTo2D(f, w, h);
-		int** tempMatrix = Convert1DTo2D(g, w, h);
+		int** matrix = Convert1DTo2D(src, srcW, srcH);
+		int** tempMatrix = Convert1DTo2D(dst, srcW, srcH);
 		int kernel[3][3] = {
-			{ c[0], c[1], c[2] },
-			{ c[3], c[4], c[5] },
-			{ c[6], c[7], c[8] }
+			{ customKernel[0], customKernel[1], customKernel[2] },
+			{ customKernel[3], customKernel[4], customKernel[5] },
+			{ customKernel[6], customKernel[7], customKernel[8] }
 		};
 
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
+        for (int y = 0; y < srcH; y++) {
+            for (int x = 0; x < srcW; x++) {
                 int sum = 0;
 
                 for (int j = -1; j <= 1; j++) {
@@ -359,19 +363,19 @@ extern "C" {
                         int newY = y + j;
 
                         // 邊界處理
-                        int clampedX = max(0, min(newX, w - 1));
-                        int clampedY = max(0, min(newY, h - 1));
+                        int clampedX = max(0, min(newX, srcW - 1));
+                        int clampedY = max(0, min(newY, srcH - 1));
 
                         sum += matrix[clampedY][clampedX] * kernel[j + 1][i + 1];
                     }
                 }
-                tempMatrix[y][x] = min(max(sum / d, 0), 255);
+                tempMatrix[y][x] = min(max(sum / divisor, 0), 255);
             }
         }
 
-        Convert2DTo1D(tempMatrix, g, w, h);
+        Convert2DTo1D(tempMatrix, dst, srcW, srcH);
 
-        for (int i = 0; i < h; i++) {
+        for (int i = 0; i < srcH; i++) {
             free(matrix[i]);
 			free(tempMatrix[i]);
         }
@@ -379,24 +383,24 @@ extern "C" {
 		free(tempMatrix);
 	}
 
-    __declspec(dllexport) void customrotationangle(int* f, int w, int h, int a, int* g)
+    __declspec(dllexport) void customrotationangle(int* src, int* dst, int srcW, int srcH, int angle)
     {
         const double M_PI = 3.14159265358979323846;
-        double theta = a * M_PI / 180.0;
+        double theta = angle * M_PI / 180.0;
 
-        int nw = (int)round(h * std::abs(sin(theta)) + w * std::abs(cos(theta)));
-        int nh = (int)round(w * std::abs(sin(theta)) + h * std::abs(cos(theta)));
+        int nw = (int)round(srcH * std::abs(sin(theta)) + srcW * std::abs(cos(theta)));
+        int nh = (int)round(srcW * std::abs(sin(theta)) + srcH * std::abs(cos(theta)));
 
         for (int i = 0; i < nw * nh; i++)
         {
-            g[i] = 255;
+            dst[i] = 255;
         }
 
-        int** matrix = Convert1DTo2D(f, w, h);
-        int** tempMatrix = Convert1DTo2D(g, nw, nh);
+        int** matrix = Convert1DTo2D(src, srcW, srcH);
+        int** tempMatrix = Convert1DTo2D(dst, nw, nh);
 
-        double cx = (w - 1.0) / 2.0;
-        double cy = (h - 1.0) / 2.0;
+        double cx = (srcW - 1.0) / 2.0;
+        double cy = (srcH - 1.0) / 2.0;
         double cx_new = (nw - 1.0) / 2.0;
         double cy_new = (nh - 1.0) / 2.0;
 
@@ -405,15 +409,15 @@ extern "C" {
                 int x_orig = (int)round(cos(-theta) * (x - cx_new) - sin(-theta) * (y - cy_new) + cx);
                 int y_orig = (int)round(sin(-theta) * (x - cx_new) + cos(-theta) * (y - cy_new) + cy);
 
-                if (x_orig >= 0 && x_orig < w && y_orig >= 0 && y_orig < h) {
+                if (x_orig >= 0 && x_orig < srcW && y_orig >= 0 && y_orig < srcH) {
                     tempMatrix[y][x] = matrix[y_orig][x_orig];
                 }
             }
         }
 
-        Convert2DTo1D(tempMatrix, g, nw, nh);
+        Convert2DTo1D(tempMatrix, dst, nw, nh);
 
-        for (int i = 0; i < h; i++) {
+        for (int i = 0; i < srcH; i++) {
             free(matrix[i]);
         }
         free(matrix);
@@ -424,13 +428,13 @@ extern "C" {
 		free(tempMatrix);
     }
 
-    __declspec(dllexport) void zoom(int* f, int w, int h, double s, int* g)
+    __declspec(dllexport) void zoom(int* src, int* dst, int srcW, int srcH, double scale)
     {
-        int nw = (int)round(w * s);
-        int nh = (int)round(h * s);
+        int nw = (int)round(srcW * scale);
+        int nh = (int)round(srcH * scale);
 
-        double scale_x = (double)(w - 1) / (nw - 1);
-        double scale_y = (double)(h - 1) / (nh - 1);
+        double scale_x = (double)(srcW - 1) / (nw - 1);
+        double scale_y = (double)(srcH - 1) / (nh - 1);
 
         for (int j = 0; j < nh; j++)
         {
@@ -441,22 +445,22 @@ extern "C" {
                 double oy = (j + 0.5) * scale_y - 0.5;
 
                 // 取得整數座標作為左上角參考點，並進行邊界約束
-                int x1 = max(0, min((int)floor(ox), w - 1));
-                int y1 = max(0, min((int)floor(oy), h - 1));
+                int x1 = max(0, min((int)floor(ox), srcW - 1));
+                int y1 = max(0, min((int)floor(oy), srcH - 1));
 
                 // 計算右下角座標，並進行邊界約束
-                int x2 = max(0, min(x1 + 1, w - 1));
-                int y2 = max(0, min(y1 + 1, h - 1));
+                int x2 = max(0, min(x1 + 1, srcW - 1));
+                int y2 = max(0, min(y1 + 1, srcH - 1));
 
                 // 計算小數部分 (距離)，並確保在 [0.0, 1.0) 範圍內
                 double dx = max(0.0, min(ox - x1, 1.0 - 1e-9)); // 減去一個極小值確保 < 1.0
                 double dy = max(0.0, min(oy - y1, 1.0 - 1e-9)); // 減去一個極小值確保 < 1.0
 
                 // 取得四個鄰近像素的值
-                int p1 = f[y1 * w + x1]; // 左上
-                int p2 = f[y1 * w + x2]; // 右上
-                int p3 = f[y2 * w + x1]; // 左下
-                int p4 = f[y2 * w + x2]; // 右下
+                int p1 = src[y1 * srcW + x1]; // 左上
+                int p2 = src[y1 * srcW + x2]; // 右上
+                int p3 = src[y2 * srcW + x1]; // 左下
+                int p4 = src[y2 * srcW + x2]; // 右下
 
                 // 進行雙線性內插
                 double interpolated_value =
@@ -465,7 +469,7 @@ extern "C" {
                     p3 * (1.0 - dx) * dy +
                     p4 * dx * dy;
 
-                g[j * nw + i] = min(max((int)round(interpolated_value), 0), 255);
+                dst[j * nw + i] = min(max((int)round(interpolated_value), 0), 255);
             }
         }
     }

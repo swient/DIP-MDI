@@ -61,49 +61,38 @@ namespace DIP
 
         private void button1_Click(object sender, EventArgs e)
         {
-            int divide;
-            int[] customize = new int[9];
-            if (!int.TryParse(textBox1.Text, out customize[0]) ||
-                !int.TryParse(textBox2.Text, out customize[1]) ||
-                !int.TryParse(textBox3.Text, out customize[2]) ||
-                !int.TryParse(textBox4.Text, out customize[3]) ||
-                !int.TryParse(textBox5.Text, out customize[4]) ||
-                !int.TryParse(textBox6.Text, out customize[5]) ||
-                !int.TryParse(textBox7.Text, out customize[6]) ||
-                !int.TryParse(textBox8.Text, out customize[7]) ||
-                !int.TryParse(textBox9.Text, out customize[8]) ||
-                !int.TryParse(textBox10.Text, out divide))
+            int divisor;
+            int[] customKernel = new int[9];
+            if (!int.TryParse(textBox1.Text, out customKernel[0]) ||
+                !int.TryParse(textBox2.Text, out customKernel[1]) ||
+                !int.TryParse(textBox3.Text, out customKernel[2]) ||
+                !int.TryParse(textBox4.Text, out customKernel[3]) ||
+                !int.TryParse(textBox5.Text, out customKernel[4]) ||
+                !int.TryParse(textBox6.Text, out customKernel[5]) ||
+                !int.TryParse(textBox7.Text, out customKernel[6]) ||
+                !int.TryParse(textBox8.Text, out customKernel[7]) ||
+                !int.TryParse(textBox9.Text, out customKernel[8]) ||
+                !int.TryParse(textBox10.Text, out divisor))
             {
                 MessageBox.Show("請輸入有效的數字！");
                 return;
             }
 
-            if (divide == 0)
+            if (divisor == 0)
             {
                 MessageBox.Show("除數不可為0");
                 return;
             }
 
-            int[] R, G, B;
-            ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
-            
-            int[] processedR = new int[NpBitmap.Width * NpBitmap.Height];
-            int[] processedG = new int[NpBitmap.Width * NpBitmap.Height];
-            int[] processedB = new int[NpBitmap.Width * NpBitmap.Height];
-            unsafe
+            // 使用泛型方法處理自定義濾波器
+            Action<IntPtr, IntPtr, int, int, object[]> customFilterWrapper = (srcPtr, dstPtr, srcW, srcH, extra) =>
             {
-                fixed (int* srcR = R, dstR = processedR)
-                fixed (int* srcG = G, dstG = processedG)
-                fixed (int* srcB = B, dstB = processedB)
+                unsafe
                 {
-                    // 進行自訂濾波器的處理
-                    ImageProcessUtils.customfilter(srcR, NpBitmap.Width, NpBitmap.Height, divide, customize, dstR);
-                    ImageProcessUtils.customfilter(srcG, NpBitmap.Width, NpBitmap.Height, divide, customize, dstG);
-                    ImageProcessUtils.customfilter(srcB, NpBitmap.Width, NpBitmap.Height, divide, customize, dstB);
+                    ImageProcessUtils.customfilter((int*)srcPtr, (int*)dstPtr, srcW, srcH, (int)extra[0], (int[])extra[1]);
                 }
-            }
-
-            pBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, NpBitmap.Width, NpBitmap.Height);
+            };
+            pBitmap = ImageProcessUtils.ProcessBitmapChannels(NpBitmap, NpBitmap.Width, NpBitmap.Height, customFilterWrapper, divisor, customKernel);
 
             pictureBox2.Image = pBitmap;
         }

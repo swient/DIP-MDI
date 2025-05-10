@@ -13,43 +13,43 @@ namespace DIP
     {
         // 載入圖像處理 DLL 函式庫
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe void negative(int* f0, int w, int h, int* g0);
-        
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe void mosaic(int* f0, int w, int h, int s, int[] c, int* g0);
-        
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe void equalization(int* f0, int w, int h, int* g0);
+        public static extern unsafe void negative(int* src, int* dst, int srcW, int srcH);
 
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe void otsuthreshold(int* f0, int w, int h, int* g0, int* t);
+        public static extern unsafe void mosaic(int* src, int* dst, int srcW, int srcH, int size, int[] region);
 
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe void highpassfilter(int* f0, int w, int h, int* g0);
-        
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe void customrotationangle(int* f0, int w, int h, int s, int* g0);
-        
-        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe void zoom(int* f0, int w, int h, double s, int* g0);
+        public static extern unsafe void equalization(int* src, int* dst, int srcW, int srcH);
 
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe void brightness(int* f0, int w, int h, int s, int* g0);
+        public static extern unsafe void otsuthreshold(int* src, int* dst, int srcW, int srcH, int* threshold);
 
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe void contrast(int* f0, int w, int h, double s, int* g0);
+        public static extern unsafe void highpassfilter(int* src, int* dst, int srcW, int srcH);
 
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe void fliphorizontal(int* f0, int w, int h, int* g0);
+        public static extern unsafe void customrotationangle(int* src, int* dst, int srcW, int srcH, int angle);
 
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe void flipvertical(int* f0, int w, int h, int* g0);
+        public static extern unsafe void zoom(int* src, int* dst, int srcW, int srcH, double scale);
 
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe void averagefilter(int* f0, int w, int h, int s, int* g0);
+        public static extern unsafe void brightness(int* src, int* dst, int srcW, int srcH, int value);
 
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe void customfilter(int* f0, int w, int h, int d, int[] c, int* g0);
+        public static extern unsafe void contrast(int* src, int* dst, int srcW, int srcH, double value);
+
+        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern unsafe void fliphorizontal(int* src, int* dst, int srcW, int srcH);
+
+        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern unsafe void flipvertical(int* src, int* dst, int srcW, int srcH);
+
+        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern unsafe void averagefilter(int* src, int* dst, int srcW, int srcH, int size);
+
+        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern unsafe void customfilter(int* src, int* dst, int srcW, int srcH, int divisor, int[] customKernel);
 
         // 計算圖片的直方圖
         public static int[] CalculateHistogram(Bitmap bitmap)
@@ -367,6 +367,36 @@ namespace DIP
                 if (byteArray != null) myBitmap.UnlockBits(byteArray);
             }
             return myBitmap;
+        }
+
+        public static Bitmap ProcessBitmapChannels(
+            Bitmap src,
+            int dstW,
+            int dstH,
+            Action<IntPtr, IntPtr, int, int, object[]> processFunc,
+            params object[] extraParams)
+        {
+            int srcW = src.Width;
+            int srcH = src.Height;
+            BitmapToRGBArrays(src, out int[] R, out int[] G, out int[] B);
+
+            int[] processedR = new int[dstW * dstH];
+            int[] processedG = new int[dstW * dstH];
+            int[] processedB = new int[dstW * dstH];
+
+            unsafe
+            {
+                fixed (int* srcR = R, dstR = processedR)
+                fixed (int* srcG = G, dstG = processedG)
+                fixed (int* srcB = B, dstB = processedB)
+                {
+                    processFunc((IntPtr)srcR, (IntPtr)dstR, srcW, srcH, extraParams);
+                    processFunc((IntPtr)srcG, (IntPtr)dstG, srcW, srcH, extraParams);
+                    processFunc((IntPtr)srcB, (IntPtr)dstB, srcW, srcH, extraParams);
+                }
+            }
+
+            return RGBArraysToBitmap(processedR, processedG, processedB, dstW, dstH);
         }
     }
 }

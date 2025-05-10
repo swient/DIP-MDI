@@ -206,30 +206,14 @@ namespace DIP
             {
                 NpBitmap = msForm.GetCurrentTabImage();
 
-                // 將 Bitmap 轉換為陣列
-                int[] R, G, B;
-                ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
-
-                int[] processedR = new int[NpBitmap.Width * NpBitmap.Height];
-                int[] processedG = new int[NpBitmap.Width * NpBitmap.Height];
-                int[] processedB = new int[NpBitmap.Width * NpBitmap.Height];
-
-                // 使用 unsafe 區域進行指針處理
-                unsafe
+                // 使用泛用方法處理負片
+                Action<IntPtr, IntPtr, int, int, object[]> negativeWrapper = (srcPtr, dstPtr, srcW, srcH, extra) =>
                 {
-                    fixed (int* srcR = R, dstR = processedR)
-                    fixed (int* srcG = G, dstG = processedG)
-                    fixed (int* srcB = B, dstB = processedB)
-                    {
-                        // 進行負片轉換的處理
-                        ImageProcessUtils.negative(srcR, NpBitmap.Width, NpBitmap.Height, dstR);
-                        ImageProcessUtils.negative(srcG, NpBitmap.Width, NpBitmap.Height, dstG);
-                        ImageProcessUtils.negative(srcB, NpBitmap.Width, NpBitmap.Height, dstB);
-                    }
-                }
+                    unsafe { ImageProcessUtils.negative((int*)srcPtr, (int*)dstPtr, srcW, srcH); }
+                };
 
                 // 將處理後的陣列轉換回 Bitmap
-                NpBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, NpBitmap.Width, NpBitmap.Height);
+                NpBitmap = ImageProcessUtils.ProcessBitmapChannels(NpBitmap, NpBitmap.Width, NpBitmap.Height, negativeWrapper);
                 msForm.SetCurrentTabImage(NpBitmap);
                 msForm.UpdateHistogram(NpBitmap);
             }
@@ -339,30 +323,14 @@ namespace DIP
             {
                 NpBitmap = msForm.GetCurrentTabImage();
 
-                // 將 Bitmap 轉換為陣列
-                int[] R, G, B;
-                ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
-
-                int[] processedR = new int[NpBitmap.Width * NpBitmap.Height];
-                int[] processedG = new int[NpBitmap.Width * NpBitmap.Height];
-                int[] processedB = new int[NpBitmap.Width * NpBitmap.Height];
-
-                // 使用 unsafe 區域進行指針處理
-                unsafe
+                // 使用泛用方法處理均衡化
+                Action<IntPtr, IntPtr, int, int, object[]> equalizationWrapper = (srcPtr, dstPtr, srcW, srcH, extra) =>
                 {
-                    fixed (int* srcR = R, dstR = processedR)
-                    fixed (int* srcG = G, dstG = processedG)
-                    fixed (int* srcB = B, dstB = processedB)
-                    {
-                        // 進行均衡化的處理
-                        ImageProcessUtils.equalization(srcR, NpBitmap.Width, NpBitmap.Height, dstR);
-                        ImageProcessUtils.equalization(srcG, NpBitmap.Width, NpBitmap.Height, dstG);
-                        ImageProcessUtils.equalization(srcB, NpBitmap.Width, NpBitmap.Height, dstB);
-                    }
-                }
+                    unsafe { ImageProcessUtils.equalization((int*)srcPtr, (int*)dstPtr, srcW, srcH); }
+                };
 
                 // 將處理後的陣列轉換回 Bitmap
-                NpBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, NpBitmap.Width, NpBitmap.Height);
+                NpBitmap = ImageProcessUtils.ProcessBitmapChannels(NpBitmap, NpBitmap.Width, NpBitmap.Height, equalizationWrapper);
                 msForm.SetCurrentTabImage(NpBitmap);
                 msForm.UpdateHistogram(NpBitmap);
             }
@@ -388,14 +356,14 @@ namespace DIP
                 // 將 Bitmap 轉換為陣列
                 int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
                 int[] g = new int[NpBitmap.Width * NpBitmap.Height];
-                int t = 0;
+                int threshold = 0;
                 
                 // 使用 unsafe 區域進行指針處理
                 unsafe
                 {
-                    fixed (int* f0 = f) fixed (int* g0 = g)
+                    fixed (int* src = f) fixed (int* dst = g)
                     {
-                        ImageProcessUtils.otsuthreshold(f0, NpBitmap.Width, NpBitmap.Height, g0, &t); // 進行二值化的處理
+                        ImageProcessUtils.otsuthreshold(src, dst, NpBitmap.Width, NpBitmap.Height, &threshold); // 進行二值化的處理
                     }
                 }
 
@@ -403,7 +371,7 @@ namespace DIP
                 NpBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
                 msForm.SetCurrentTabImage(NpBitmap);
                 msForm.UpdateHistogram(NpBitmap);
-                msForm.SetCurrentTabThreshold(t);
+                msForm.SetCurrentTabThreshold(threshold);
                 msForm.UpdateStatusBar();
             }
             else
@@ -529,9 +497,9 @@ namespace DIP
                 // 使用 unsafe 區域進行指針處理
                 unsafe
                 {
-                    fixed (int* f0 = f) fixed (int* g0 = g)
+                    fixed (int* src = f) fixed (int* dst = g)
                     {
-                        ImageProcessUtils.highpassfilter(f0, NpBitmap.Width, NpBitmap.Height, g0); // 進行高通濾波器的處理
+                        ImageProcessUtils.highpassfilter(src, dst, NpBitmap.Width, NpBitmap.Height); // 進行高通濾波器的處理
                     }
                 }
 
@@ -590,30 +558,14 @@ namespace DIP
                 int new_weight = NpBitmap.Height;
                 int new_height = NpBitmap.Width;
 
-                // 將 Bitmap 轉換為陣列
-                int[] R, G, B;
-                ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
-
-                int[] processedR = new int[new_weight * new_height];
-                int[] processedG = new int[new_weight * new_height];
-                int[] processedB = new int[new_weight * new_height];
-
-                // 使用 unsafe 區域進行指針處理
-                unsafe
+                // 使用泛用方法處理旋轉90度
+                Action<IntPtr, IntPtr, int, int, object[]> rotate90Wrapper = (srcPtr, dstPtr, srcW, srcH, extra) =>
                 {
-                    fixed (int* srcR = R, dstR = processedR)
-                    fixed (int* srcG = G, dstG = processedG)
-                    fixed (int* srcB = B, dstB = processedB)
-                    {
-                        // 進行旋轉90度的處理
-                        ImageProcessUtils.customrotationangle(srcR, NpBitmap.Width, NpBitmap.Height, 90, dstR);
-                        ImageProcessUtils.customrotationangle(srcG, NpBitmap.Width, NpBitmap.Height, 90, dstG);
-                        ImageProcessUtils.customrotationangle(srcB, NpBitmap.Width, NpBitmap.Height, 90, dstB);
-                    }
-                }
+                    unsafe { ImageProcessUtils.customrotationangle((int*)srcPtr, (int*)dstPtr, srcW, srcH, (int)extra[0]); }
+                };
 
                 // 將處理後的陣列轉換回 Bitmap
-                NpBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, new_weight, new_height);
+                NpBitmap = ImageProcessUtils.ProcessBitmapChannels(NpBitmap, new_weight, new_height, rotate90Wrapper, 90);
                 msForm.SetCurrentTabImage(NpBitmap);
                 msForm.UpdateHistogram(NpBitmap);
             }
@@ -639,30 +591,14 @@ namespace DIP
                 int new_weight = NpBitmap.Width;
                 int new_height = NpBitmap.Height;
 
-                // 將 Bitmap 轉換為陣列
-                int[] R, G, B;
-                ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
-
-                int[] processedR = new int[new_weight * new_height];
-                int[] processedG = new int[new_weight * new_height];
-                int[] processedB = new int[new_weight * new_height];
-
-                // 使用 unsafe 區域進行指針處理
-                unsafe
+                // 使用泛用方法處理旋轉180度
+                Action<IntPtr, IntPtr, int, int, object[]> rotate180Wrapper = (srcPtr, dstPtr, srcW, srcH, extra) =>
                 {
-                    fixed (int* srcR = R, dstR = processedR)
-                    fixed (int* srcG = G, dstG = processedG)
-                    fixed (int* srcB = B, dstB = processedB)
-                    {
-                        // 進行旋轉180度的處理
-                        ImageProcessUtils.customrotationangle(srcR, NpBitmap.Width, NpBitmap.Height, 180, dstR);
-                        ImageProcessUtils.customrotationangle(srcG, NpBitmap.Width, NpBitmap.Height, 180, dstG);
-                        ImageProcessUtils.customrotationangle(srcB, NpBitmap.Width, NpBitmap.Height, 180, dstB);
-                    }
-                }
+                    unsafe { ImageProcessUtils.customrotationangle((int*)srcPtr, (int*)dstPtr, srcW, srcH, (int)extra[0]); }
+                };
 
                 // 將處理後的陣列轉換回 Bitmap
-                NpBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, new_weight, new_height);
+                NpBitmap = ImageProcessUtils.ProcessBitmapChannels(NpBitmap, new_weight, new_height, rotate180Wrapper, 180);
                 msForm.SetCurrentTabImage(NpBitmap);
                 msForm.UpdateHistogram(NpBitmap);
             }
@@ -688,30 +624,14 @@ namespace DIP
                 int new_weight = NpBitmap.Height;
                 int new_height = NpBitmap.Width;
 
-                // 將 Bitmap 轉換為陣列
-                int[] R, G, B;
-                ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
-
-                int[] processedR = new int[new_weight * new_height];
-                int[] processedG = new int[new_weight * new_height];
-                int[] processedB = new int[new_weight * new_height];
-
-                // 使用 unsafe 區域進行指針處理
-                unsafe
+                // 使用泛用方法處理旋轉270度
+                Action<IntPtr, IntPtr, int, int, object[]> rotate270Wrapper = (srcPtr, dstPtr, srcW, srcH, extra) =>
                 {
-                    fixed (int* srcR = R, dstR = processedR)
-                    fixed (int* srcG = G, dstG = processedG)
-                    fixed (int* srcB = B, dstB = processedB)
-                    {
-                        // 進行旋轉270度的處理
-                        ImageProcessUtils.customrotationangle(srcR, NpBitmap.Width, NpBitmap.Height, 270, dstR);
-                        ImageProcessUtils.customrotationangle(srcG, NpBitmap.Width, NpBitmap.Height, 270, dstG);
-                        ImageProcessUtils.customrotationangle(srcB, NpBitmap.Width, NpBitmap.Height, 270, dstB);
-                    }
-                }
+                    unsafe { ImageProcessUtils.customrotationangle((int*)srcPtr, (int*)dstPtr, srcW, srcH, (int)extra[0]); }
+                };
 
                 // 將處理後的陣列轉換回 Bitmap
-                NpBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, new_weight, new_height);
+                NpBitmap = ImageProcessUtils.ProcessBitmapChannels(NpBitmap, new_weight, new_height, rotate270Wrapper, 270);
                 msForm.SetCurrentTabImage(NpBitmap);
                 msForm.UpdateHistogram(NpBitmap);
             }
@@ -763,30 +683,14 @@ namespace DIP
             {
                 NpBitmap = msForm.GetCurrentTabImage();
 
-                // 將 Bitmap 轉換為三個 RGB 陣列
-                int[] R, G, B;
-                ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
-
-                int[] processedR = new int[NpBitmap.Width * NpBitmap.Height];
-                int[] processedG = new int[NpBitmap.Width * NpBitmap.Height];
-                int[] processedB = new int[NpBitmap.Width * NpBitmap.Height];
-
-                // 使用 unsafe 區域進行指針處理
-                unsafe
+                // 使用泛用方法處理水平翻轉
+                Action<IntPtr, IntPtr, int, int, object[]> flipHWrapper = (srcPtr, dstPtr, srcW, srcH, extra) =>
                 {
-                    fixed (int* srcR = R, dstR = processedR)
-                    fixed (int* srcG = G, dstG = processedG)
-                    fixed (int* srcB = B, dstB = processedB)
-                    {
-                        // 進行水平翻轉的處理
-                        ImageProcessUtils.fliphorizontal(srcR, NpBitmap.Width, NpBitmap.Height, dstR);
-                        ImageProcessUtils.fliphorizontal(srcG, NpBitmap.Width, NpBitmap.Height, dstG);
-                        ImageProcessUtils.fliphorizontal(srcB, NpBitmap.Width, NpBitmap.Height, dstB);
-                    }
-                }
+                    unsafe { ImageProcessUtils.fliphorizontal((int*)srcPtr, (int*)dstPtr, srcW, srcH); }
+                };
 
                 // 將處理後的陣列轉換回 Bitmap
-                NpBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, NpBitmap.Width, NpBitmap.Height);
+                NpBitmap = ImageProcessUtils.ProcessBitmapChannels(NpBitmap, NpBitmap.Width, NpBitmap.Height, flipHWrapper);
                 msForm.SetCurrentTabImage(NpBitmap);
                 msForm.UpdateHistogram(NpBitmap);
             }
@@ -809,30 +713,14 @@ namespace DIP
             {
                 NpBitmap = msForm.GetCurrentTabImage();
 
-                // 將 Bitmap 轉換為三個 RGB 陣列
-                int[] R, G, B;
-                ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
-
-                int[] processedR = new int[NpBitmap.Width * NpBitmap.Height];
-                int[] processedG = new int[NpBitmap.Width * NpBitmap.Height];
-                int[] processedB = new int[NpBitmap.Width * NpBitmap.Height];
-
-                // 使用 unsafe 區域進行指針處理
-                unsafe
+                // 使用泛用方法處理垂直翻轉
+                Action<IntPtr, IntPtr, int, int, object[]> flipVWrapper = (srcPtr, dstPtr, srcW, srcH, extra) =>
                 {
-                    fixed (int* srcR = R, dstR = processedR)
-                    fixed (int* srcG = G, dstG = processedG)
-                    fixed (int* srcB = B, dstB = processedB)
-                    {
-                        // 進行垂直翻轉的處理
-                        ImageProcessUtils.flipvertical(srcR, NpBitmap.Width, NpBitmap.Height, dstR);
-                        ImageProcessUtils.flipvertical(srcG, NpBitmap.Width, NpBitmap.Height, dstG);
-                        ImageProcessUtils.flipvertical(srcB, NpBitmap.Width, NpBitmap.Height, dstB);
-                    }
-                }
+                    unsafe { ImageProcessUtils.flipvertical((int*)srcPtr, (int*)dstPtr, srcW, srcH); }
+                };
 
                 // 將處理後的陣列轉換回 Bitmap
-                NpBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, NpBitmap.Width, NpBitmap.Height);
+                NpBitmap = ImageProcessUtils.ProcessBitmapChannels(NpBitmap, NpBitmap.Width, NpBitmap.Height, flipVWrapper);
                 msForm.SetCurrentTabImage(NpBitmap);
                 msForm.UpdateHistogram(NpBitmap);
             }
@@ -869,30 +757,14 @@ namespace DIP
                     int new_weight = (int)Math.Round(NpBitmap.Width * scale);
                     int new_height = (int)Math.Round(NpBitmap.Height * scale);
 
-                    // 將 Bitmap 轉換為陣列
-                    int[] R, G, B;
-                    ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
-
-                    int[] processedR = new int[new_weight * new_height];
-                    int[] processedG = new int[new_weight * new_height];
-                    int[] processedB = new int[new_weight * new_height];
-
-                    // 使用 unsafe 區域進行指針處理
-                    unsafe
+                    // 使用泛用方法處理放大
+                    Action<IntPtr, IntPtr, int, int, object[]> zoomWrapper = (srcPtr, dstPtr, srcW, srcH, extra) =>
                     {
-                        fixed (int* srcR = R, dstR = processedR)
-                        fixed (int* srcG = G, dstG = processedG)
-                        fixed (int* srcB = B, dstB = processedB)
-                        {
-                            // 進行放大的處理
-                            ImageProcessUtils.zoom(srcR, NpBitmap.Width, NpBitmap.Height, scale, dstR);
-                            ImageProcessUtils.zoom(srcG, NpBitmap.Width, NpBitmap.Height, scale, dstG);
-                            ImageProcessUtils.zoom(srcB, NpBitmap.Width, NpBitmap.Height, scale, dstB);
-                        }
-                    }
+                        unsafe { ImageProcessUtils.zoom((int*)srcPtr, (int*)dstPtr, srcW, srcH, (double)extra[0]); }
+                    };
 
                     // 將處理後的陣列轉換回 Bitmap
-                    NpBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, new_weight, new_height);
+                    NpBitmap = ImageProcessUtils.ProcessBitmapChannels(NpBitmap, new_weight, new_height, zoomWrapper, scale);
                     msForm.SetCurrentTabImage(NpBitmap);
                     msForm.UpdateHistogram(NpBitmap);
                 }
@@ -937,30 +809,14 @@ namespace DIP
                     int new_weight = (int)Math.Round(NpBitmap.Width * scale);
                     int new_height = (int)Math.Round(NpBitmap.Height * scale);
 
-                    // 將 Bitmap 轉換為陣列
-                    int[] R, G, B;
-                    ImageProcessUtils.BitmapToRGBArrays(NpBitmap, out R, out G, out B);
-
-                    int[] processedR = new int[new_weight * new_height];
-                    int[] processedG = new int[new_weight * new_height];
-                    int[] processedB = new int[new_weight * new_height];
-
-                    // 使用 unsafe 區域進行指針處理
-                    unsafe
+                    // 使用泛用方法處理縮小
+                    Action<IntPtr, IntPtr, int, int, object[]> zoomWrapper = (srcPtr, dstPtr, srcW, srcH, extra) =>
                     {
-                        fixed (int* srcR = R, dstR = processedR)
-                        fixed (int* srcG = G, dstG = processedG)
-                        fixed (int* srcB = B, dstB = processedB)
-                        {
-                            // 進行縮小的處理
-                            ImageProcessUtils.zoom(srcR, NpBitmap.Width, NpBitmap.Height, scale, dstR);
-                            ImageProcessUtils.zoom(srcG, NpBitmap.Width, NpBitmap.Height, scale, dstG);
-                            ImageProcessUtils.zoom(srcB, NpBitmap.Width, NpBitmap.Height, scale, dstB);
-                        }
-                    }
+                        unsafe { ImageProcessUtils.zoom((int*)srcPtr, (int*)dstPtr, srcW, srcH, (double)extra[0]); }
+                    };
 
                     // 將處理後的陣列轉換回 Bitmap
-                    NpBitmap = ImageProcessUtils.RGBArraysToBitmap(processedR, processedG, processedB, new_weight, new_height);
+                    NpBitmap = ImageProcessUtils.ProcessBitmapChannels(NpBitmap, new_weight, new_height, zoomWrapper, scale);
                     msForm.SetCurrentTabImage(NpBitmap);
                     msForm.UpdateHistogram(NpBitmap);
                 }
