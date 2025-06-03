@@ -128,16 +128,22 @@ namespace DIP
             }
         }
 
-        public void SetCurrentTabThreshold(int t)
+        private class TabInfo
         {
-            if (tabControl1.SelectedTab != null)
-                tabControl1.SelectedTab.Tag = t;
+            public int? Threshold { get; set; }
+            public int? LabelCount { get; set; }
         }
 
-        public int? GetCurrentTabThreshold()
+        public void SetCurrentTabInfo(int? threshold = null, int? labelCount = null)
         {
-            if (tabControl1.SelectedTab != null && tabControl1.SelectedTab.Tag is int t)
-                return t;
+            if (tabControl1.SelectedTab != null)
+                tabControl1.SelectedTab.Tag = new TabInfo { Threshold = threshold, LabelCount = labelCount };
+        }
+
+        private TabInfo GetCurrentTabInfo()
+        {
+            if (tabControl1.SelectedTab != null && tabControl1.SelectedTab.Tag is TabInfo info)
+                return info;
             return null;
         }
 
@@ -148,7 +154,7 @@ namespace DIP
             // pf1: (Width,Height)
             Bitmap image = GetCurrentTabImage();
             if (image != null)
-            { 
+            {
                 pf1.Text = $"(Width,Height): ({image.Width},{image.Height})";
                 pf1.BorderSides = ToolStripStatusLabelBorderSides.All;
             }
@@ -170,11 +176,16 @@ namespace DIP
                 pf2.BorderSides = ToolStripStatusLabelBorderSides.None;
             }
 
-            // pf3: Threshold
-            int? threshold = GetCurrentTabThreshold();
-            if (threshold.HasValue)
+            // pf3: Threshold 或 LabelCount
+            var info = GetCurrentTabInfo();
+            if (info != null)
             {
-                pf3.Text = $"Threshold: {threshold.Value}";
+                string msg = "";
+                if (info.Threshold.HasValue)
+                    msg = $"Threshold: {info.Threshold.Value}";
+                else if (info.LabelCount.HasValue)
+                    msg = $"LabelCount: {info.LabelCount.Value}";
+                pf3.Text = msg;
                 pf3.BorderSides = ToolStripStatusLabelBorderSides.All;
             }
             else

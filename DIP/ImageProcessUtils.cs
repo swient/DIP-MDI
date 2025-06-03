@@ -25,6 +25,9 @@ namespace DIP
         public static extern unsafe void otsuthreshold(int* src, int* dst, int srcW, int srcH, int* threshold);
 
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern unsafe void connectedcomponent(int* src, int srcW, int srcH, int* labelCount);
+
+        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern unsafe void highpassfilter(int* src, int* dst, int srcW, int srcH);
 
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]

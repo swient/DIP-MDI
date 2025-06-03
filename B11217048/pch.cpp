@@ -252,10 +252,85 @@ extern "C" {
        }
 
        for (int i = 0; i < srcW * srcH; i++) {
-           dst[i] = (src[i] >= *threshold) ? 255 : 0;
+           dst[i] = (src[i] > *threshold) ? 255 : 0;
        }
 
        free(hist);
+    }
+
+    __declspec(dllexport) void connectedcomponent(int* src, int srcW, int srcH, int* labelCount)
+    {
+        // Otsu 二值化
+        int* binaryImage = (int*)malloc(srcW * srcH * sizeof(int));
+        int threshold = 0;
+        otsuthreshold(src, binaryImage, srcW, srcH, &threshold);
+
+        // 兩遍法連通元件標記
+        int* labelImage = (int*)calloc(srcW * srcH, sizeof(int));
+        int* labelParent = (int*)calloc(srcW * srcH, sizeof(int));
+        int nextLabelId = 1;
+
+        for (int i = 0; i < srcW * srcH; i++) labelParent[i] = i;
+
+        for (int y = 0; y < srcH; y++) {
+            for (int x = 0; x < srcW; x++) {
+                int idx = y * srcW + x;
+                if (binaryImage[idx] == 0) continue;
+
+                int leftLabel = (x > 0) ? labelImage[y * srcW + (x - 1)] : 0;
+                int upLabel = (y > 0) ? labelImage[(y - 1) * srcW + x] : 0;
+
+                if (leftLabel == 0 && upLabel == 0) {
+                    labelImage[idx] = nextLabelId++;
+                } else if (leftLabel != 0 && upLabel == 0) {
+                    labelImage[idx] = leftLabel;
+                } else if (leftLabel == 0 && upLabel != 0) {
+                    labelImage[idx] = upLabel;
+                } else {
+                    labelImage[idx] = (leftLabel < upLabel) ? leftLabel : upLabel;
+                    int a = leftLabel, b = upLabel;
+                    while (labelParent[a] != a) a = labelParent[a];
+                    while (labelParent[b] != b) b = labelParent[b];
+                    if (a != b) labelParent[b] = a;
+                }
+            }
+        }
+
+        for (int i = 1; i < nextLabelId; i++) {
+            int root = i;
+            while (labelParent[root] != root) root = labelParent[root];
+            labelParent[i] = root;
+        }
+
+        int maxLabelId = 0;
+        for (int i = 0; i < srcW * srcH; i++) {
+            if (labelImage[i] != 0) {
+                int root = labelImage[i];
+                while (labelParent[root] != root) root = labelParent[root];
+                labelImage[i] = root;
+                if (root > maxLabelId) maxLabelId = root;
+            }
+        }
+
+        int* labelLUT = (int*)calloc(nextLabelId, sizeof(int));
+        int newLabelId = 1;
+        for (int i = 1; i <= maxLabelId; i++) {
+            if (labelParent[i] == i) {
+                labelLUT[i] = newLabelId++;
+            }
+        }
+        for (int i = 0; i < srcW * srcH; i++) {
+            if (labelImage[i] != 0) {
+                labelImage[i] = labelLUT[labelImage[i]];
+            }
+        }
+
+        if (labelCount) *labelCount = newLabelId - 1;
+
+        free(binaryImage);
+        free(labelImage);
+        free(labelParent);
+        free(labelLUT);
     }
 
     __declspec(dllexport) void averagefilter(int* src, int* dst, int srcW, int srcH, int size)

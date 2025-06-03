@@ -371,7 +371,42 @@ namespace DIP
                 NpBitmap = ImageProcessUtils.ArrayToBitmap(g, NpBitmap.Width, NpBitmap.Height);
                 msForm.SetCurrentTabImage(NpBitmap);
                 msForm.UpdateHistogram(NpBitmap);
-                msForm.SetCurrentTabThreshold(threshold);
+                msForm.SetCurrentTabInfo(threshold: threshold);
+                msForm.UpdateStatusBar();
+            }
+            else
+            {
+                MessageBox.Show("請先完成編輯");
+                return;
+            }
+        }
+
+        private void 連通標記toolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MdiChildren.Length == 0)
+            {
+                MessageBox.Show("沒有開啟的圖片");
+                return;
+            }
+
+            if (ActiveMdiChild is MSForm msForm)
+            {
+                NpBitmap = msForm.GetCurrentTabImage();
+
+                // 將 Bitmap 轉換為陣列
+                int[] f = ImageProcessUtils.BitmapToArray(NpBitmap);
+                int labelCount = 0;
+
+                // 使用 unsafe 區域進行指針處理
+                unsafe
+                {
+                    fixed (int* src = f)
+                    {
+                        ImageProcessUtils.connectedcomponent(src, NpBitmap.Width, NpBitmap.Height, &labelCount); // 進行連通標記的處理
+                    }
+                }
+
+                msForm.SetCurrentTabInfo(labelCount: labelCount);
                 msForm.UpdateStatusBar();
             }
             else
