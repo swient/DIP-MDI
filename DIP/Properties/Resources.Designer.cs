@@ -81,6 +81,26 @@ namespace DIP.Properties {
         }
         
         /// <summary>
+        ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
+        /// </summary>
+        internal static System.Drawing.Bitmap famouseegg {
+            get {
+                object obj = ResourceManager.GetObject("famouseegg", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
+        /// </summary>
+        internal static System.Drawing.Bitmap fush0528 {
+            get {
+                object obj = ResourceManager.GetObject("fush0528", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   查詢類似 (圖示) 的類型 System.Drawing.Icon 當地語系化資源。
         /// </summary>
         internal static System.Drawing.Icon MainForm {
@@ -91,12 +111,32 @@ namespace DIP.Properties {
         }
         
         /// <summary>
+        ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
+        /// </summary>
+        internal static System.Drawing.Bitmap Rooong {
+            get {
+                object obj = ResourceManager.GetObject("Rooong", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   查詢類似 (圖示) 的類型 System.Drawing.Icon 當地語系化資源。
         /// </summary>
         internal static System.Drawing.Icon Settings {
             get {
                 object obj = ResourceManager.GetObject("Settings", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
+        /// </summary>
+        internal static System.Drawing.Bitmap swient {
+            get {
+                object obj = ResourceManager.GetObject("swient", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }

@@ -50,8 +50,9 @@ namespace DIP
             bool sliderFormExists = this.MdiChildren.OfType<SliderForm>().Any();
             bool filterFormExists = this.MdiChildren.OfType<FilterForm>().Any();
             bool baseEnabled = msFormExists && !sliderFormExists && !filterFormExists; // 基本啟用狀態
-            // 檢查是否有直方圖表單存在
+            // 檢查是否有表單存在
             bool histogramFormExists = this.MdiChildren.Any(form => form.Text == "直方圖");
+            bool aboutFormExists = this.MdiChildren.OfType<AboutForm>().Any();
 
             // 根據是否存在子表單來啟用/禁用相關選單項目
             儲存ToolStripMenuItem.Enabled = baseEnabled;
@@ -59,8 +60,9 @@ namespace DIP
             視圖ToolStripMenuItem.Enabled = baseEnabled;
             圖像toolStripMenuItem.Enabled = baseEnabled;
             濾波器ToolStripMenuItem.Enabled = baseEnabled;
-            // 如果直方圖表單存在，則禁用直方圖選單項目
+            // 如果表單存在，則禁用直方圖選單項目
             直方圖ToolStripMenuItem.Enabled = !histogramFormExists;
+            關於ToolStripMenuItem.Enabled = !aboutFormExists;
         }
 
         private void 開啟ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -865,6 +867,18 @@ namespace DIP
             {
                 MessageBox.Show("請先完成編輯");
                 return;
+            }
+        }
+
+        private void 關於ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AboutForm childForm = this.MdiChildren.OfType<AboutForm>().FirstOrDefault();
+
+            if (childForm == null)
+            {
+                childForm = new AboutForm();
+                childForm.MdiParent = this;
+                childForm.Show();
             }
         }
     }

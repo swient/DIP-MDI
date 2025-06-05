@@ -76,6 +76,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AboutForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AboutForm.Designer.cs">
+      <DependentUpon>AboutForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="DIPSample.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -103,6 +109,9 @@
     <Compile Include="SliderForm.Designer.cs">
       <DependentUpon>SliderForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="AboutForm.resx">
+      <DependentUpon>AboutForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DIPSample.resx">
       <DependentUpon>DIPSample.cs</DependentUpon>
     </EmbeddedResource>
@@ -141,6 +150,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppIcon.ico" />
+    <EmbeddedResource Include="Properties\Avatars\fush0528.png" />
+    <EmbeddedResource Include="Properties\Avatars\swient.png" />
+    <EmbeddedResource Include="Properties\Avatars\Rooong.png" />
+    <EmbeddedResource Include="Properties\Avatars\famouseegg.png" />
     <None Include="Properties\Icons\About.ico" />
     <None Include="Properties\Icons\Settings.ico" />
     <None Include="Properties\Icons\ChildForm.ico" />
