@@ -323,6 +323,7 @@ namespace DIP
             this.ClientSize = new System.Drawing.Size(1278, 644);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Margin = new System.Windows.Forms.Padding(4);
+            this.Icon = global::DIP.Properties.Resources.ChildForm;
             this.Name = "FilterForm";
             this.Text = "FilterForm";
             this.Load += new System.EventHandler(this.FilterForm_Load);

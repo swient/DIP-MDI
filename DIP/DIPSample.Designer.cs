@@ -372,6 +372,7 @@ namespace DIP
             this.ClientSize = new System.Drawing.Size(1578, 944);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
+            this.Icon = global::DIP.Properties.Resources.MainForm;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "DIPSample";
             this.Text = "DIPSample";

@@ -138,6 +138,7 @@ namespace DIP
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(949, 471);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Icon = global::DIP.Properties.Resources.ChildForm;
             this.Name = "SliderForm";
             this.Text = "SliderForm";
             this.Load += new System.EventHandler(this.SliderForm_Load);
