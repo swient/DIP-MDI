@@ -43,6 +43,9 @@ namespace DIP
         public static extern unsafe void contrast(int* src, int* dst, int srcW, int srcH, double value);
 
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern unsafe void bitplane(int* src, int* dst, int srcW, int srcH, int index);
+
+        [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern unsafe void fliphorizontal(int* src, int* dst, int srcW, int srcH);
 
         [DllImport("B11217048.dll", CallingConvention = CallingConvention.Cdecl)]

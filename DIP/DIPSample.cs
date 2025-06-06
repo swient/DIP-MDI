@@ -708,6 +708,35 @@ namespace DIP
             }
         }
 
+        private void 位元切片ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MdiChildren.Length == 0)
+            {
+                MessageBox.Show("沒有開啟的圖片");
+                return;
+            }
+
+            if (ActiveMdiChild is MSForm msForm)
+            {
+                NpBitmap = msForm.GetCurrentTabImage();
+
+                SliderForm childForm = new SliderForm();
+                childForm.Select = "BitPlane";
+                childForm.MdiParent = this;
+                childForm.pf1 = toolStripStatusLabel1;
+                childForm.pf2 = toolStripStatusLabel2;
+                childForm.pf3 = toolStripStatusLabel3;
+                childForm.NpBitmap = NpBitmap;
+                childForm.OriginalTabTitle = msForm.GetCurrentTabTitle();
+                childForm.Show();
+            }
+            else
+            {
+                MessageBox.Show("請先完成編輯");
+                return;
+            }
+        }
+
         private void 水平翻轉ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (MdiChildren.Length == 0)

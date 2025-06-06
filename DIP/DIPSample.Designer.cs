@@ -60,15 +60,16 @@ namespace DIP
             this.高通濾波器ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.自訂濾波器ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.更多ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.設定ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.關於ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-            this.更多ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.設定ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.關於ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.位元切片ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -128,35 +129,35 @@ namespace DIP
             // 灰階轉換toolStripMenuItem
             // 
             this.灰階轉換toolStripMenuItem.Name = "灰階轉換toolStripMenuItem";
-            this.灰階轉換toolStripMenuItem.Size = new System.Drawing.Size(182, 34);
+            this.灰階轉換toolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.灰階轉換toolStripMenuItem.Text = "灰階轉換";
             this.灰階轉換toolStripMenuItem.Click += new System.EventHandler(this.灰階轉換toolStripMenuItem_Click);
             // 
             // 負片轉換ToolStripMenuItem
             // 
             this.負片轉換ToolStripMenuItem.Name = "負片轉換ToolStripMenuItem";
-            this.負片轉換ToolStripMenuItem.Size = new System.Drawing.Size(182, 34);
+            this.負片轉換ToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.負片轉換ToolStripMenuItem.Text = "負片轉換";
             this.負片轉換ToolStripMenuItem.Click += new System.EventHandler(this.負片轉換ToolStripMenuItem_Click);
             // 
             // 均衡化ToolStripMenuItem
             // 
             this.均衡化ToolStripMenuItem.Name = "均衡化ToolStripMenuItem";
-            this.均衡化ToolStripMenuItem.Size = new System.Drawing.Size(182, 34);
+            this.均衡化ToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.均衡化ToolStripMenuItem.Text = "均衡化";
             this.均衡化ToolStripMenuItem.Click += new System.EventHandler(this.均衡化ToolStripMenuItem_Click);
             // 
             // 二值化toolStripMenuItem
             // 
             this.二值化toolStripMenuItem.Name = "二值化toolStripMenuItem";
-            this.二值化toolStripMenuItem.Size = new System.Drawing.Size(182, 34);
+            this.二值化toolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.二值化toolStripMenuItem.Text = "二值化";
             this.二值化toolStripMenuItem.Click += new System.EventHandler(this.二值化toolStripMenuItem_Click);
             // 
             // 連通標記ToolStripMenuItem
             // 
             this.連通標記ToolStripMenuItem.Name = "連通標記ToolStripMenuItem";
-            this.連通標記ToolStripMenuItem.Size = new System.Drawing.Size(182, 34);
+            this.連通標記ToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.連通標記ToolStripMenuItem.Text = "連通標記";
             this.連通標記ToolStripMenuItem.Click += new System.EventHandler(this.連通標記toolStripMenuItem_Click);
             // 
@@ -171,7 +172,7 @@ namespace DIP
             // 直方圖ToolStripMenuItem
             // 
             this.直方圖ToolStripMenuItem.Name = "直方圖ToolStripMenuItem";
-            this.直方圖ToolStripMenuItem.Size = new System.Drawing.Size(164, 34);
+            this.直方圖ToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.直方圖ToolStripMenuItem.Text = "直方圖";
             this.直方圖ToolStripMenuItem.Click += new System.EventHandler(this.直方圖ToolStripMenuItem_Click);
             // 
@@ -184,7 +185,8 @@ namespace DIP
             this.旋轉圖像ToolStripMenuItem,
             this.翻轉圖像ToolStripMenuItem,
             this.放大圖像ToolStripMenuItem,
-            this.縮小圖像ToolStripMenuItem});
+            this.縮小圖像ToolStripMenuItem,
+            this.位元切片ToolStripMenuItem});
             this.圖像toolStripMenuItem.Name = "圖像toolStripMenuItem";
             this.圖像toolStripMenuItem.Size = new System.Drawing.Size(62, 28);
             this.圖像toolStripMenuItem.Text = "圖像";
@@ -192,21 +194,21 @@ namespace DIP
             // 亮度ToolStripMenuItem
             // 
             this.亮度ToolStripMenuItem.Name = "亮度ToolStripMenuItem";
-            this.亮度ToolStripMenuItem.Size = new System.Drawing.Size(200, 34);
+            this.亮度ToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.亮度ToolStripMenuItem.Text = "亮度";
             this.亮度ToolStripMenuItem.Click += new System.EventHandler(this.亮度ToolStripMenuItem_Click);
             // 
             // 對比度ToolStripMenuItem
             // 
             this.對比度ToolStripMenuItem.Name = "對比度ToolStripMenuItem";
-            this.對比度ToolStripMenuItem.Size = new System.Drawing.Size(200, 34);
+            this.對比度ToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.對比度ToolStripMenuItem.Text = "對比度";
             this.對比度ToolStripMenuItem.Click += new System.EventHandler(this.對比度ToolStripMenuItem_Click);
             // 
             // 局部馬賽克ToolStripMenuItem
             // 
             this.局部馬賽克ToolStripMenuItem.Name = "局部馬賽克ToolStripMenuItem";
-            this.局部馬賽克ToolStripMenuItem.Size = new System.Drawing.Size(200, 34);
+            this.局部馬賽克ToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.局部馬賽克ToolStripMenuItem.Text = "局部馬賽克";
             this.局部馬賽克ToolStripMenuItem.Click += new System.EventHandler(this.局部馬賽克ToolStripMenuItem_Click);
             // 
@@ -219,7 +221,7 @@ namespace DIP
             this.toolStripSeparator2,
             this.自訂旋轉角度ToolStripMenuItem});
             this.旋轉圖像ToolStripMenuItem.Name = "旋轉圖像ToolStripMenuItem";
-            this.旋轉圖像ToolStripMenuItem.Size = new System.Drawing.Size(200, 34);
+            this.旋轉圖像ToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.旋轉圖像ToolStripMenuItem.Text = "旋轉圖像";
             // 
             // 向右旋轉90度ToolStripMenuItem
@@ -261,7 +263,7 @@ namespace DIP
             this.水平翻轉ToolStripMenuItem,
             this.垂直翻轉ToolStripMenuItem});
             this.翻轉圖像ToolStripMenuItem.Name = "翻轉圖像ToolStripMenuItem";
-            this.翻轉圖像ToolStripMenuItem.Size = new System.Drawing.Size(200, 34);
+            this.翻轉圖像ToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.翻轉圖像ToolStripMenuItem.Text = "翻轉圖像";
             // 
             // 水平翻轉ToolStripMenuItem
@@ -281,14 +283,14 @@ namespace DIP
             // 放大圖像ToolStripMenuItem
             // 
             this.放大圖像ToolStripMenuItem.Name = "放大圖像ToolStripMenuItem";
-            this.放大圖像ToolStripMenuItem.Size = new System.Drawing.Size(200, 34);
+            this.放大圖像ToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.放大圖像ToolStripMenuItem.Text = "放大圖像";
             this.放大圖像ToolStripMenuItem.Click += new System.EventHandler(this.放大圖像ToolStripMenuItem_Click);
             // 
             // 縮小圖像ToolStripMenuItem
             // 
             this.縮小圖像ToolStripMenuItem.Name = "縮小圖像ToolStripMenuItem";
-            this.縮小圖像ToolStripMenuItem.Size = new System.Drawing.Size(200, 34);
+            this.縮小圖像ToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.縮小圖像ToolStripMenuItem.Text = "縮小圖像";
             this.縮小圖像ToolStripMenuItem.Click += new System.EventHandler(this.縮小圖像ToolStripMenuItem_Click);
             // 
@@ -328,6 +330,28 @@ namespace DIP
             this.自訂濾波器ToolStripMenuItem.Size = new System.Drawing.Size(200, 34);
             this.自訂濾波器ToolStripMenuItem.Text = "自訂濾波器";
             this.自訂濾波器ToolStripMenuItem.Click += new System.EventHandler(this.自訂濾波器ToolStripMenuItem_Click);
+            // 
+            // 更多ToolStripMenuItem
+            // 
+            this.更多ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.設定ToolStripMenuItem,
+            this.關於ToolStripMenuItem});
+            this.更多ToolStripMenuItem.Name = "更多ToolStripMenuItem";
+            this.更多ToolStripMenuItem.Size = new System.Drawing.Size(62, 28);
+            this.更多ToolStripMenuItem.Text = "更多";
+            // 
+            // 設定ToolStripMenuItem
+            // 
+            this.設定ToolStripMenuItem.Name = "設定ToolStripMenuItem";
+            this.設定ToolStripMenuItem.Size = new System.Drawing.Size(146, 34);
+            this.設定ToolStripMenuItem.Text = "設定";
+            // 
+            // 關於ToolStripMenuItem
+            // 
+            this.關於ToolStripMenuItem.Name = "關於ToolStripMenuItem";
+            this.關於ToolStripMenuItem.Size = new System.Drawing.Size(146, 34);
+            this.關於ToolStripMenuItem.Text = "關於";
+            this.關於ToolStripMenuItem.Click += new System.EventHandler(this.關於ToolStripMenuItem_Click);
             // 
             // statusStrip1
             // 
@@ -369,27 +393,12 @@ namespace DIP
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
-            // 更多ToolStripMenuItem
+            // 位元切片ToolStripMenuItem
             // 
-            this.更多ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.設定ToolStripMenuItem,
-            this.關於ToolStripMenuItem});
-            this.更多ToolStripMenuItem.Name = "更多ToolStripMenuItem";
-            this.更多ToolStripMenuItem.Size = new System.Drawing.Size(62, 28);
-            this.更多ToolStripMenuItem.Text = "更多";
-            // 
-            // 設定ToolStripMenuItem
-            // 
-            this.設定ToolStripMenuItem.Name = "設定ToolStripMenuItem";
-            this.設定ToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
-            this.設定ToolStripMenuItem.Text = "設定";
-            // 
-            // 關於ToolStripMenuItem
-            // 
-            this.關於ToolStripMenuItem.Name = "關於ToolStripMenuItem";
-            this.關於ToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
-            this.關於ToolStripMenuItem.Text = "關於";
-            this.關於ToolStripMenuItem.Click += new System.EventHandler(this.關於ToolStripMenuItem_Click);
+            this.位元切片ToolStripMenuItem.Name = "位元切片ToolStripMenuItem";
+            this.位元切片ToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
+            this.位元切片ToolStripMenuItem.Text = "位元切片";
+            this.位元切片ToolStripMenuItem.Click += new System.EventHandler(this.位元切片ToolStripMenuItem_Click);
             // 
             // DIPSample
             // 
@@ -456,6 +465,7 @@ namespace DIP
         private System.Windows.Forms.ToolStripMenuItem 更多ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 設定ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 關於ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 位元切片ToolStripMenuItem;
     }
 }
 

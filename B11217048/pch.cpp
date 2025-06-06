@@ -503,6 +503,18 @@ extern "C" {
 		free(tempMatrix);
     }
 
+	__declspec(dllexport) void bitplane(int* src, int* dst, int srcW, int srcH, int index)
+	{
+		for (int i = 0; i < srcW * srcH; i++) {
+			if (((src[i] & 0xff) >> index) & 1) {
+				dst[i] = 255;
+			}
+			else {
+				dst[i] = 0;
+			}
+		}
+	}
+
     __declspec(dllexport) void zoom(int* src, int* dst, int srcW, int srcH, double scale)
     {
         int nw = (int)round(srcW * scale);

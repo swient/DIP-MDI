@@ -82,6 +82,15 @@ namespace DIP
                     trackBar1.Value = 3;
                     textBox1.Text = "3";
                     break;
+                case "BitPlane":
+                    label1.Text = "位元切片";
+                    trackBar1.Minimum = 0;
+                    trackBar1.Maximum = 7;
+                    trackBar1.Value = 0;
+                    textBox1.Text = "0";
+                    // 初始化時直接觸發滑塊事件，確保圖片立即更新
+                    trackBar1_Scroll(this, EventArgs.Empty);
+                    break;
             }
         }
 
@@ -103,7 +112,7 @@ namespace DIP
 
             if (Select == "CustomRotation") // 自訂旋轉角度
             {
-                if (NpBitmap.Width < 256 | NpBitmap.Height < 256)
+                if (NpBitmap.Width < 256 || NpBitmap.Height < 256)
                 {
                     this.Width = (int)(256 * 1.414) + label1.Width + trackBar1.Width + (this.Width - this.ClientRectangle.Width) + 50;
                     this.Height = (int)(256 * 1.414) + (this.Height - this.ClientRectangle.Height) + 100;
@@ -284,6 +293,25 @@ namespace DIP
                         }
                     };
                     pBitmap = ImageProcessUtils.ProcessBitmapChannels(NpBitmap, width, height, mosaicWrapper, value, region);
+                    break;
+                }
+
+                case "BitPlane": // 位元切片
+                {
+                    textBox1.Text = trackBar1.Value.ToString();
+                    int width = NpBitmap.Width;
+                    int height = NpBitmap.Height;
+                    int value = trackBar1.Value;
+                    
+                    // 使用泛用方法處理位元切片
+                    Action<IntPtr, IntPtr, int, int, object[]> bitplaneWrapper = (srcPtr, dstPtr, srcW, srcH, extra) =>
+                    {
+                        unsafe
+                        {
+                            ImageProcessUtils.bitplane((int*)srcPtr, (int*)dstPtr, srcW, srcH, (int)extra[0]);
+                        }
+                    };
+                    pBitmap = ImageProcessUtils.ProcessBitmapChannels(NpBitmap, width, height, bitplaneWrapper, value);
                     break;
                 }
             }
